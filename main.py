@@ -1,48 +1,68 @@
+from model import updateProcess, getListProcess, VProcess
 import sys
-from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QLabel, QLineEdit, QComboBox, QVBoxLayout, QTableWidget
-from Button import Button, Geometry
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QPushButton
 
-def clickevent() -> None:
-    #valor = le.text()
-    valor: str = str(combo.currentText())
-    label.setText(valor)
-    label.adjustSize()
+def main():
+    app = QApplication(sys.argv)
 
-class Button(QPushButton):
-    def __init__(self, text: str, window: QWidget = None, geometry: Geometry = None) -> None:
-        if(window is not None):
-            super().__init__(text, window)
-            self.wsize = window.size()
-            if(geometry is not None):
-                self.setGeometry(geometry.posx - geometry.width//2, geometry.posy - geometry.height//2, geometry.width, geometry.height)
+    # Criar a janela principal
+    window = QWidget()
+    window.setWindowTitle("Tabela de Itens")
+    window.setFixedSize(500, 300)
+
+    # Layout principal
+    layout = QVBoxLayout()
+
+    # Criar o QTableWidget (tabela)
+    table = QTableWidget()
+    table.setRowCount(3)  # Número de linhas
+    table.setColumnCount(3)  # Número de colunas
+    table.setHorizontalHeaderLabels(["Nome", "Valor", "Descrição"])
+
+    # Adicionar itens à tabela (Nome, Valor, Descrição)
+    table.setItem(0, 0, QTableWidgetItem("Produto A"))
+    table.setItem(0, 1, QTableWidgetItem("R$ 10,00"))
+    table.setItem(0, 2, QTableWidgetItem("Descrição do Produto A"))
+
+    table.setItem(1, 0, QTableWidgetItem("Produto B"))
+    table.setItem(1, 1, QTableWidgetItem("R$ 20,00"))
+    table.setItem(1, 2, QTableWidgetItem("Descrição do Produto B"))
+
+    table.setItem(2, 0, QTableWidgetItem("Produto C"))
+    table.setItem(2, 1, QTableWidgetItem("R$ 30,00"))
+    table.setItem(2, 2, QTableWidgetItem("Descrição do Produto C"))
+
+    # Função para mostrar o item selecionado
+    def show_selected_item():
+        selected_item = table.currentItem()
+        if selected_item:
+            row = table.currentRow()
+            col = table.currentColumn()
+            print(f"Item selecionado: {table.item(row, 0).text()} - {table.item(row, 1).text()} - {table.item(row, 2).text()}")
         else:
-            super().__init__(text)
-        self.ratio: float = window.size().width() / window.size().height()
-app = QApplication(sys.argv)
-window = QWidget()
-window.resize(800,600)
-window.setWindowTitle("First Window")
-button = Button("My Button", window, Geometry(window.size().width()//2, window.size().height()//2, 150, 100))
-button.setStyleSheet('background-color: Blue;color: White')
+            print("Nenhum item selecionado")
 
-label = QLabel("Label", window)
-label.move(100,300)
-label.setStyleSheet('font-size: 30px')
-button.clicked.connect(clickevent)
+    # Botão para mostrar item selecionado
+    button = QPushButton("Mostrar item selecionado")
+    button.clicked.connect(show_selected_item)
 
-combo = QComboBox(window)
-combo.addItem("Selecione uma linguagem de programação") # Primeiro item é o que voce quer q o usuario visualize no menu
-combo.addItem("Java")
-combo.addItem("Python")
-combo.addItem("C")
-combo.addItem("C++")
-combo.move(10,10)
-main_layout = QVBoxLayout()
-table = QTableWidget(0, 3)
-table.setHorizontalHeaderLabels(["Nome", "Preço", "Quantidade"])
+    # Adicionar widgets ao layout
+    layout.addWidget(table)
+    layout.addWidget(button)
 
-le = QLineEdit("", window)
-le.setGeometry(500, 500, 150, 30)
+    # Definir o layout da janela principal
+    window.setLayout(layout)
 
-window.show()
-app.exec()
+    # Exibir a janela
+    window.show()
+
+    # Iniciar o loop da aplicação
+    sys.exit(app.exec())
+
+# Executar a função principal
+if __name__ == "__main__":
+    updateProcess()
+    a = getListProcess()
+    for b in a:
+        b.getInfo()
+    main()
