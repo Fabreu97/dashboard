@@ -2,7 +2,7 @@
 import os
 
 proc = '/proc'
-list_process: list = []
+
 # ID : int
 # name : str
 class VProcess:
@@ -32,10 +32,9 @@ def findName(pid : int) -> str | None:
             return file.readline().strip()
     return None
 
-def updateProcess() -> None:
+def getListProcess() -> list:
+    list_process : list = []
     pids = findPIDs()
     for pid in pids:
         list_process.append(VProcess(pid, findName(pid)))
-
-def getListProcess() -> list:
     return list_process
