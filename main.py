@@ -1,4 +1,4 @@
-from model import getListProcess, VProcess
+from model import getInfoProcess,  VProcess
 import sys
 import time
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QPushButton, QLabel
@@ -15,34 +15,43 @@ def main():
     layout = QVBoxLayout()
 
     # Criar o QTableWidget (tabela)
-    lprocess = getListProcess()
+    lprocess = getInfoProcess()
     table = QTableWidget()
     table.setRowCount(len(lprocess))  # Número de linhas
-    table.setColumnCount(2)  # Número de colunas
+    table.setColumnCount(6)  # Número de colunas
     table.setHorizontalHeaderLabels(["PID", "Name"])
-    table.setFixedSize(500,300)
+    table.setFixedSize(960,300)
     table.setGeometry(30,200, 960, 250)
     table.setColumnWidth(0,100)
     table.setColumnWidth(1,300)
+    table.setColumnWidth(2,100)
+    table.setColumnWidth(3,100)
+    table.setColumnWidth(4,100)
+    table.setColumnWidth(5,100)
+    start_time = time.time()
+    lprocess = getInfoProcess()
+    half_time = time.time()
+    table.setRowCount(len(lprocess))  # Número de linhas
     for i,p in enumerate(lprocess):
-            j = 0
-            table.setItem(i,j, QTableWidgetItem(p.getId()))
-            j += 1
-            table.setItem(i,j, QTableWidgetItem(p.getName()))
+        list_info = p.getInfo()
+        for j,l in enumerate(list_info):
+            table.setItem(i,j, QTableWidgetItem(str(l)))
+    end_time = time.time()
+    print(f"T1: {(half_time - start_time):2f}")
+    print(f"T2: {end_time - half_time:2f}\n")
     # Adicionar itens à tabela (Nome, Valor, Descrição)
     def update() -> None:
         start_time = time.time()
-        lprocess = getListProcess()
+        lprocess = getInfoProcess()
         half_time = time.time()
         table.setRowCount(len(lprocess))  # Número de linhas
         for i,p in enumerate(lprocess):
-            j = 0
-            table.setItem(i,j, QTableWidgetItem(p.getId()))
-            j += 1
-            table.setItem(i,j, QTableWidgetItem(p.getName()))
+            list_info = p.getInfo()
+            for j,l in enumerate(list_info):
+                table.setItem(i,j, QTableWidgetItem(str(l)))
         end_time = time.time()
         print(f"T1: {(half_time - start_time):2f}")
-        print(f"T2: {end_time - start_time:2f}\n")
+        print(f"T2: {end_time - half_time:2f}\n")
     # Função para mostrar o item selecionado
     def show_selected_item():
         selected_item = table.currentItem()
