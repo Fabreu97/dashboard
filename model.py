@@ -2,6 +2,7 @@
 import os
 import datetime
 START_TIME: int = 22
+MAX_ATTEMPS: int = 3
 # Dicionario com as informações do processo
 # [0]*PID       = Id do processo
 # [1]*COMMAND   =  O nome do arquivo do executável entre parênteses
@@ -47,7 +48,7 @@ proc = '/proc'
 # ID : int
 # name : str
 class VProcess:
-    def __init__(self, id : int, command: str, state: str, PPID: int, start_time: int, vsize: int):
+    def __init__(self, id : int, command: str, state: str, PPID: int, start_time: str, vsize: int):
         self.id = id
         self.command = command
         if (state=='R'):
@@ -63,8 +64,9 @@ class VProcess:
         else:
             self.state = "Desconhecido"
         self.PPID = PPID
-        date = datetime.datetime.fromtimestamp(start_time)
-        self.start_time = date.strftime("%Y-%m-%d %H:%M:%S")
+        #date = datetime.datetime.fromtimestamp(int(start_time))
+        #self.start_time = date.strftime("%Y-%m-%d %H:%M:%S")
+        self.start_time = start_time
         self.vsize = vsize
     def getId(self) -> int:
         return self.id
@@ -98,8 +100,8 @@ def getInfoProcess() -> list:
         try:
             with open(f"/proc/{pid}/stat") as file:
                 process_info = file.readline().strip().split()
-                list_process.append(VProcess(int(process_info[0]), str(process_info[1]), str(process_info[2]), int(process_info[3]), int(str(process_info[START_TIME])[:-3]), int(process_info[21])))
-        except Exception:
-            print("TRATOU!")
-        
+                list_process.append(VProcess(int(process_info[0]), str(process_info[1]), str(process_info[2]), int(process_info[3]), str(process_info[START_TIME]), int(process_info[21])))
+                ok = True
+        except Exception as e:
+            print(f"ERROR({pid}): {e}")
     return list_process
