@@ -1,8 +1,9 @@
 # Model : camada de armazenamento e manipulação de dados
 import os
-import datetime
 START_TIME: int = 22
 MAX_ATTEMPS: int = 3
+PAGE_SIZE = 4096
+CONSTANTE_MULTIPLICATIVA_MEMORIA = ["B", "KB", "MB", "GB", "TB"]
 # Dicionario com as informações do processo
 # [0]*PID       = Id do processo
 # [1]*COMMAND   =  O nome do arquivo do executável entre parênteses
@@ -31,7 +32,7 @@ MAX_ATTEMPS: int = 3
 # [19]ITREALVALUE   = O tempo (em ciclos do processador) antes que o próximo SIGALRM seja enviado para o processo relativo a um intervalo de tempo.
 # [20]*STARTTIME = tempo, em ciclos do processador, que o processo iniciou após o sistema ser iniciado.
 # [21]*VSIZE     = tamanho da memória virtual;
-# [22]RSS       = tamanho do conjunto residente;
+# [22]*RSS       = tamanho do conjunto residente;
 # [23]RLIM      = Limite em bytes do rss do processo (normalmente 2,147,483,647).
 # [24]STARTCODE = O endereço acima do qual o texto do  programa deve ser executado.
 # [25]ENDCODE   = O endereço abaixo do qual o texto do programa deve ser executado.
@@ -48,7 +49,7 @@ proc = '/proc'
 # ID : int
 # name : str
 class VProcess:
-    def __init__(self, id : int, command: str, state: str, PPID: int, start_time: str, vsize: int):
+    def __init__(self, id : int, command: str, state: str, PPID: int, start_time: str, vsize: int, RSS: int):
         self.id = id
         self.command = command
         if (state=='R'):
@@ -68,6 +69,12 @@ class VProcess:
         #self.start_time = date.strftime("%Y-%m-%d %H:%M:%S")
         self.start_time = start_time
         self.vsize = vsize
+        i: int = 0
+        rss_bytes: float = 4096*RSS
+        while(rss_bytes/1024 > 1.0):
+            rss_bytes = rss_bytes/1024
+            i += 1
+        self.rss : str = f"{rss_bytes:.1f}" + CONSTANTE_MULTIPLICATIVA_MEMORIA[i] + '\0'
     def getId(self) -> int:
         return self.id
     def getCommand(self) -> str:
@@ -75,7 +82,7 @@ class VProcess:
     def getState(self) -> str:
         return self.state
     def getInfo(self) -> list:
-        return [self.id, self.command, self.state, self.PPID, self.start_time, self.vsize]
+        return [self.id, self.command, self.state, self.PPID, self.start_time, self.vsize, self.rss]
 
 def findPIDs() -> list:
     pid = []
@@ -100,8 +107,7 @@ def getInfoProcess() -> list:
         try:
             with open(f"/proc/{pid}/stat") as file:
                 process_info = file.readline().strip().split()
-                list_process.append(VProcess(int(process_info[0]), str(process_info[1]), str(process_info[2]), int(process_info[3]), str(process_info[START_TIME]), int(process_info[21])))
-                ok = True
+                list_process.append(VProcess(int(process_info[0]), str(process_info[1]), str(process_info[2]), int(process_info[3]), str(process_info[START_TIME]), int(process_info[21]), int(process_info[23])))
         except Exception as e:
             print(f"ERROR({pid}): {e}")
     return list_process

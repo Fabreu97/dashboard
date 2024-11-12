@@ -1,8 +1,11 @@
-from model import getInfoProcess,  VProcess
+from model import getInfoProcess,  VProcess, CONSTANTE_MULTIPLICATIVA_MEMORIA
 import sys
 import time
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QPushButton, QLabel
 from PyQt6.QtGui import QColor, QPalette
+
+N_CAMPOS_PROCESSO: int = 7 
+
 def main():
     app = QApplication(sys.argv)
 
@@ -37,23 +40,24 @@ def main():
     half_time = time.time()
     table = QTableWidget()
     table.setRowCount(len(lprocess))  # Número de linhas
-    table.setColumnCount(6)  # Número de colunas
-    table.setHorizontalHeaderLabels(["PID", "COMMAND", "STATE", "PARENT", "START_TIME", "VSIZE"])
+    table.setColumnCount(N_CAMPOS_PROCESSO)  # Número de colunas
+    table.setHorizontalHeaderLabels(["PID", "COMMAND", "STATE", "PARENT", "START_TIME", "VSIZE", "MEMORY"])
     table.setFixedSize(960,300)
     table.setGeometry(30,200, 960, 250)
-    table.setColumnWidth(0,100)
-    table.setColumnWidth(1,360)
+    table.setColumnWidth(0,50)
+    table.setColumnWidth(1,300)
     table.setColumnWidth(2,100)
     table.setColumnWidth(3,100)
     table.setColumnWidth(4,100)
+    table.setColumnWidth(5,100)
     table.setColumnWidth(5,100)
     for i,p in enumerate(lprocess):
         list_info = p.getInfo()
         for j,l in enumerate(list_info):
             table.setItem(i,j, QTableWidgetItem(str(l)))
     end_time = time.time()
-    print(f"T1: {(half_time - start_time):2f}")
-    print(f"T2: {end_time - half_time:2f}\n")
+    print(f"T1: {(half_time - start_time):.3f}")
+    print(f"T2: {end_time - half_time:.3f}\n")
     # Adicionar itens à tabela (Nome, Valor, Descrição)
     def update() -> None:
         start_time = time.time()
@@ -65,8 +69,8 @@ def main():
             for j,l in enumerate(list_info):
                 table.setItem(i,j, QTableWidgetItem(str(l)))
         end_time = time.time()
-        print(f"T1: {(half_time - start_time):2f}")
-        print(f"T2: {end_time - half_time:2f}\n")
+        print(f"T1: {(half_time - start_time):.3f}")
+        print(f"T2: {end_time - half_time:.3f}\n")
     # Função para mostrar o item selecionado
     def show_selected_item():
         selected_item = table.currentItem()
