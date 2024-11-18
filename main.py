@@ -1,8 +1,9 @@
-from model import getInfoProcess,  VProcess, CONSTANTE_MULTIPLICATIVA_MEMORIA
+from model import getInfoProcess, getInfoMem, convertUnidade, MEM_INFO_KEY
 import sys
 import time
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QPushButton, QLabel
 from PyQt6.QtGui import QColor, QPalette
+from PyQt6.QtCore import Qt
 
 N_CAMPOS_PROCESSO: int = 7 
 
@@ -12,7 +13,7 @@ def main():
     # Criar a janela principal
     window = QWidget()
     window.setWindowTitle("Dashboard - Gerenciador de Tarefas")
-    window.setFixedSize(1000, 600)
+    window.setFixedSize(1010, 600)
 
     # Criar um QPalette para configurar o modo escuro
     dark_palette = QPalette()
@@ -35,6 +36,7 @@ def main():
     layout = QVBoxLayout()
 
     # Criar o QTableWidget (tabela)
+    infomem = getInfoMem()
     start_time = time.time()
     lprocess = getInfoProcess()
     half_time = time.time()
@@ -43,7 +45,7 @@ def main():
     table.setColumnCount(N_CAMPOS_PROCESSO)  # Número de colunas
     table.setHorizontalHeaderLabels(["PID", "COMMAND", "STATE", "PARENT", "START_TIME", "VSIZE", "MEMORY"])
     table.setFixedSize(960,300)
-    table.setGeometry(30,200, 960, 250)
+    table.setGeometry(20,200, 960, 300)
     table.setColumnWidth(0,50)
     table.setColumnWidth(1,300)
     table.setColumnWidth(2,100)
@@ -71,17 +73,20 @@ def main():
         end_time = time.time()
         print(f"T1: {(half_time - start_time):.3f}")
         print(f"T2: {end_time - half_time:.3f}\n")
-    # Função para mostrar o item selecionado
-    def show_selected_item():
-        selected_item = table.currentItem()
-        if selected_item:
-            row = table.currentRow()
-            col = table.currentColumn()
-            print(f"Item selecionado: {table.item(row, 0).text()} - {table.item(row, 1).text()}")
+        for i,info in enumerate(infomem):
+            print(f"{MEM_INFO_KEY[i]}:{convertUnidade("KB", info):>16}")
+    def sort_table(index):
+        # Alterna entre ordenação crescente e decrescente
+        current_sort_order = table.horizontalHeader().sortIndicatorOrder()
+        if current_sort_order == Qt.SortOrder.AscendingOrder:
+            table.sortItems(index, Qt.SortOrder.DescendingOrder)
         else:
-            print("Nenhum item selecionado")
+            table.sortItems(index, Qt.SortOrder.AscendingOrder)
     def clickedevent():
         update()
+    
+    # Conectando o clique do cabeçalho à função de ordenação
+    table.horizontalHeader().sectionClicked.connect(sort_table)
     # Botão para mostrar item selecionado
     button = QPushButton("Atualizar", window)
     button.clicked.connect(clickedevent)

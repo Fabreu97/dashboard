@@ -4,6 +4,19 @@ START_TIME: int = 22
 MAX_ATTEMPS: int = 3
 PAGE_SIZE = 4096
 CONSTANTE_MULTIPLICATIVA_MEMORIA = ["B", "KB", "MB", "GB", "TB"]
+MEM_INFO_KEY = [
+    "MemTotal", "MemFree", "MemAvailable", "Buffers", "Cached", 
+    "SwapCached", "Active", "Inactive", "Active(anon)", "Inactive(anon)", 
+    "Active(file)", "Inactive(file)", "Unevictable", "Mlocked", "SwapTotal", 
+    "SwapFree", "Zswap", "Zswapped", "Dirty", "Writeback", "AnonPages", 
+    "Mapped", "Shmem", "KReclaimable", "Slab", "SReclaimable", "SUnreclaim", 
+    "KernelStack", "PageTables", "SecPageTables", "NFS_Unstable", "Bounce", 
+    "WritebackTmp", "CommitLimit", "Committed_AS", "VmallocTotal", "VmallocUsed", 
+    "VmallocChunk", "Percpu", "HardwareCorrupted", "AnonHugePages", "ShmemHugePages", 
+    "ShmemPmdMapped", "FileHugePages", "FilePmdMapped", "Unaccepted", "HugePages_Total", 
+    "HugePages_Free", "HugePages_Rsvd", "HugePages_Surp", "Hugepagesize", "Hugetlb", 
+    "DirectMap4k", "DirectMap2M"
+]
 # Dicionario com as informações do processo
 # [0]*PID       = Id do processo
 # [1]*COMMAND   =  O nome do arquivo do executável entre parênteses
@@ -45,7 +58,7 @@ CONSTANTE_MULTIPLICATIVA_MEMORIA = ["B", "KB", "MB", "GB", "TB"]
 # [32]SIGCATCH  = mapa de bits de sinais recebidos
 # [33]WCHAN     = Este é o canal no qual o processo fica esperando. Este é o endereço da chamada ao sistema, e pode ser analisada em uma lista de nomes, caso se necessite de um nome textual (caso se tenha um /etc/psdatabase atualizado, então tente ps -l para ver o campo WCHAN em ação).
 proc = '/proc'
-
+memory = 'meminfo'
 # ID : int
 # name : str
 class VProcess:
@@ -74,7 +87,7 @@ class VProcess:
         while(rss_bytes/1024 > 1.0):
             rss_bytes = rss_bytes/1024
             i += 1
-        self.rss : str = f"{rss_bytes:.1f}" + CONSTANTE_MULTIPLICATIVA_MEMORIA[i] + '\0'
+        self.rss : str = f"{rss_bytes:.1f}" + CONSTANTE_MULTIPLICATIVA_MEMORIA[i]
     def getId(self) -> int:
         return self.id
     def getCommand(self) -> str:
@@ -111,3 +124,30 @@ def getInfoProcess() -> list:
         except Exception as e:
             print(f"ERROR({pid}): {e}")
     return list_process
+
+def getInfoMem() -> list:
+    lnumber: list = []
+    path: str = f"{proc}/{memory}"
+    try:
+        with open(path, "r") as file:
+            for line in file:
+                lnumber.append(int(''.join(filter(str.isdigit, line))))
+    except Exception as e:
+        print(f"Error {path}: {e}")
+    finally:
+        return lnumber
+#
+# cmc = Current Multiplicative constant
+def convertUnidade(cmc: str, value: int) -> str:
+    result: str = ""
+    try:
+        i = CONSTANTE_MULTIPLICATIVA_MEMORIA.index(cmc)
+    except ValueError:
+        print(f"Elemento não encontrado: {cmc}")
+    v = value
+    while(float(v/1024) > 1.0):
+        v = v/1024
+        i += 1
+    result  = f"{v:.2f}{CONSTANTE_MULTIPLICATIVA_MEMORIA[i]}"
+    return result
+    
