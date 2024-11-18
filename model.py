@@ -4,19 +4,8 @@ START_TIME: int = 22
 MAX_ATTEMPS: int = 3
 PAGE_SIZE = 4096
 CONSTANTE_MULTIPLICATIVA_MEMORIA = ["B", "KB", "MB", "GB", "TB"]
-MEM_INFO_KEY = [
-    "MemTotal", "MemFree", "MemAvailable", "Buffers", "Cached", 
-    "SwapCached", "Active", "Inactive", "Active(anon)", "Inactive(anon)", 
-    "Active(file)", "Inactive(file)", "Unevictable", "Mlocked", "SwapTotal", 
-    "SwapFree", "Zswap", "Zswapped", "Dirty", "Writeback", "AnonPages", 
-    "Mapped", "Shmem", "KReclaimable", "Slab", "SReclaimable", "SUnreclaim", 
-    "KernelStack", "PageTables", "SecPageTables", "NFS_Unstable", "Bounce", 
-    "WritebackTmp", "CommitLimit", "Committed_AS", "VmallocTotal", "VmallocUsed", 
-    "VmallocChunk", "Percpu", "HardwareCorrupted", "AnonHugePages", "ShmemHugePages", 
-    "ShmemPmdMapped", "FileHugePages", "FilePmdMapped", "Unaccepted", "HugePages_Total", 
-    "HugePages_Free", "HugePages_Rsvd", "HugePages_Surp", "Hugepagesize", "Hugetlb", 
-    "DirectMap4k", "DirectMap2M"
-]
+MEM_INFO: dict = {}
+
 # Dicionario com as informações do processo
 # [0]*PID       = Id do processo
 # [1]*COMMAND   =  O nome do arquivo do executável entre parênteses
@@ -61,7 +50,7 @@ proc = '/proc'
 memory = 'meminfo'
 # ID : int
 # name : str
-class VProcess:
+class Process:
     def __init__(self, id : int, command: str, state: str, PPID: int, start_time: str, vsize: int, RSS: int):
         self.id = id
         self.command = command
@@ -78,25 +67,46 @@ class VProcess:
         else:
             self.state = "Desconhecido"
         self.PPID = PPID
+        self.children: list = []
         #date = datetime.datetime.fromtimestamp(int(start_time))
         #self.start_time = date.strftime("%Y-%m-%d %H:%M:%S")
         self.start_time = start_time
         self.vsize = vsize
         i: int = 0
+        self.memory_kb = 4096*RSS
         rss_bytes: float = 4096*RSS
         while(rss_bytes/1024 > 1.0):
             rss_bytes = rss_bytes/1024
             i += 1
-        self.rss : str = f"{rss_bytes:.1f}" + CONSTANTE_MULTIPLICATIVA_MEMORIA[i]
+        self.memory : str = f"{rss_bytes:.2f}" + CONSTANTE_MULTIPLICATIVA_MEMORIA[i]
+        self.memory_total: str = ""
     def getId(self) -> int:
         return self.id
     def getCommand(self) -> str:
         return self.command
     def getState(self) -> str:
         return self.state
+    def getParent(self) -> int:
+        return self.PPID
     def getInfo(self) -> list:
-        return [self.id, self.command, self.state, self.PPID, self.start_time, self.vsize, self.rss]
-
+        return [self.id, self.command, self.state, self.PPID, self.start_time, self.vsize, self.memory, self.memory_total]
+    def addProcessChildren(self, vprocess) -> None:
+        self.children.append(vprocess)
+    def getMemory(self) -> int:
+        memory: int = self.memory_kb
+        for p in self.children:
+            memory += p.getMemory_KB()
+        return memory
+    def getMemory_KB(self) -> int:
+        return self.memory_kb
+    def updateMemoryTotal(self) -> None:
+        self.memory_total = convertUnidade('KB', self.getMemory())
+    def getMemoryTotal(self) -> str:
+        return self.memory_total
+# end of class VProcess
+#
+# Functions
+#
 def findPIDs() -> list:
     pid = []
     if os.path.exists(proc):
@@ -106,37 +116,55 @@ def findPIDs() -> list:
                 pid.append(name_dir)
     return pid
 
-def findName(pid : int) -> str | None:
-    path = f"{proc}/{pid}"
-    if os.path.exists(path):
-        with open(f"{path}/comm", "r") as file:
-            return file.readline().strip()
-    return None
-
-def getInfoProcess() -> list:
-    list_process: list = []
+def getInfoProcesses() -> list:
+    list_processes: list = []
     lpid = findPIDs()
     for pid in lpid:
         try:
             with open(f"/proc/{pid}/stat") as file:
                 process_info = file.readline().strip().split()
-                list_process.append(VProcess(int(process_info[0]), str(process_info[1]), str(process_info[2]), int(process_info[3]), str(process_info[START_TIME]), int(process_info[21]), int(process_info[23])))
+                list_processes.append(Process(int(process_info[0]), str(process_info[1]), str(process_info[2]), int(process_info[3]), str(process_info[START_TIME]), int(process_info[21]), int(process_info[23])))
         except Exception as e:
             print(f"ERROR({pid}): {e}")
-    return list_process
+    updateProcesses(list_processes)
+    for p in list_processes:
+        p.updateMemoryTotal()
+    return list_processes
 
-def getInfoMem() -> list:
-    lnumber: list = []
+def getInfoMem() -> None:
     path: str = f"{proc}/{memory}"
     try:
         with open(path, "r") as file:
             for line in file:
-                lnumber.append(int(''.join(filter(str.isdigit, line))))
+                index: int = line.find(":")
+                key: str = line[:index]
+                MEM_INFO[key] = convertUnidade("KB",int(''.join(filter(str.isdigit, line))))
     except Exception as e:
         print(f"Error {path}: {e}")
-    finally:
-        return lnumber
-#
+
+def findProcess(list_processes: list, begin: int, end: int, target: int) -> int:
+    index: int = int((begin + end)/2)
+    if(begin <= end):
+        pid: int = list_processes[index].getId()
+        if pid == target:
+            return index
+        elif(pid < target):
+            return findProcess(list_processes, index+1, end, target)
+        else:
+            return findProcess(list_processes, begin, end - 1, target)
+    else:
+        return -1
+
+def updateProcesses(list_processes) -> None:
+    ppid: int
+    index: int
+    for p in list_processes:
+        ppid = p.getParent()
+        if(ppid != 0):
+            index = findProcess(list_processes, 0, len(list_processes) - 1, ppid)
+            if(index != -1):
+                list_processes[index].addProcessChildren(p)
+
 # cmc = Current Multiplicative constant
 def convertUnidade(cmc: str, value: int) -> str:
     result: str = ""

@@ -1,11 +1,11 @@
-from model import getInfoProcess, getInfoMem, convertUnidade, MEM_INFO_KEY
+from model import getInfoProcesses, getInfoMem, convertUnidade, MEM_INFO
 import sys
 import time
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QPushButton, QLabel
 from PyQt6.QtGui import QColor, QPalette
 from PyQt6.QtCore import Qt
 
-N_CAMPOS_PROCESSO: int = 7 
+N_CAMPOS_PROCESSO: int = 8 
 
 def main():
     app = QApplication(sys.argv)
@@ -38,21 +38,21 @@ def main():
     # Criar o QTableWidget (tabela)
     infomem = getInfoMem()
     start_time = time.time()
-    lprocess = getInfoProcess()
+    lprocess = getInfoProcesses()
     half_time = time.time()
     table = QTableWidget()
     table.setRowCount(len(lprocess))  # Número de linhas
     table.setColumnCount(N_CAMPOS_PROCESSO)  # Número de colunas
-    table.setHorizontalHeaderLabels(["PID", "COMMAND", "STATE", "PARENT", "START_TIME", "VSIZE", "MEMORY"])
+    table.setHorizontalHeaderLabels(["PID", "COMMAND", "STATE", "PARENT", "START_TIME", "VSIZE", "MEMORY", "TOTAL"])
     table.setFixedSize(960,300)
     table.setGeometry(20,200, 960, 300)
     table.setColumnWidth(0,50)
     table.setColumnWidth(1,300)
     table.setColumnWidth(2,100)
-    table.setColumnWidth(3,100)
+    table.setColumnWidth(3,40)
     table.setColumnWidth(4,100)
     table.setColumnWidth(5,100)
-    table.setColumnWidth(5,100)
+    table.setColumnWidth(6,100)
     for i,p in enumerate(lprocess):
         list_info = p.getInfo()
         for j,l in enumerate(list_info):
@@ -63,7 +63,7 @@ def main():
     # Adicionar itens à tabela (Nome, Valor, Descrição)
     def update() -> None:
         start_time = time.time()
-        lprocess = getInfoProcess()
+        lprocess = getInfoProcesses()
         half_time = time.time()
         table.setRowCount(len(lprocess))  # Número de linhas
         for i,p in enumerate(lprocess):
@@ -73,20 +73,10 @@ def main():
         end_time = time.time()
         print(f"T1: {(half_time - start_time):.3f}")
         print(f"T2: {end_time - half_time:.3f}\n")
-        for i,info in enumerate(infomem):
-            print(f"{MEM_INFO_KEY[i]}:{convertUnidade("KB", info):>16}")
-    def sort_table(index):
-        # Alterna entre ordenação crescente e decrescente
-        current_sort_order = table.horizontalHeader().sortIndicatorOrder()
-        if current_sort_order == Qt.SortOrder.AscendingOrder:
-            table.sortItems(index, Qt.SortOrder.DescendingOrder)
-        else:
-            table.sortItems(index, Qt.SortOrder.AscendingOrder)
+        for key, value in MEM_INFO.items():
+            print(f"{key}: {value:>16}")
     def clickedevent():
         update()
-    
-    # Conectando o clique do cabeçalho à função de ordenação
-    table.horizontalHeader().sectionClicked.connect(sort_table)
     # Botão para mostrar item selecionado
     button = QPushButton("Atualizar", window)
     button.clicked.connect(clickedevent)
