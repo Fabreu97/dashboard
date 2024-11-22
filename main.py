@@ -1,4 +1,4 @@
-from model import getInfoProcesses, getInfoMem, convertUnidade, MEM_INFO
+from model import getInfoProcesses, getInfoMem, convertUnidade, MEM_INFO, getInfoProcessor
 import sys
 import time
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QPushButton, QLabel
@@ -47,9 +47,9 @@ def main():
     table.setFixedSize(960,300)
     table.setGeometry(20,200, 960, 300)
     table.setColumnWidth(0,50)
-    table.setColumnWidth(1,300)
+    table.setColumnWidth(1,250)
     table.setColumnWidth(2,100)
-    table.setColumnWidth(3,40)
+    table.setColumnWidth(3,60)
     table.setColumnWidth(4,100)
     table.setColumnWidth(5,100)
     table.setColumnWidth(6,100)
@@ -66,15 +66,22 @@ def main():
         lprocess = getInfoProcesses()
         half_time = time.time()
         table.setRowCount(len(lprocess))  # Número de linhas
+        memory_total: int = 0
         for i,p in enumerate(lprocess):
             list_info = p.getInfo()
+            memory_total += p.getMemory_B()
             for j,l in enumerate(list_info):
                 table.setItem(i,j, QTableWidgetItem(str(l)))
+        print(f"Memory TOTAL: {convertUnidade('B', memory_total)}")
         end_time = time.time()
         print(f"T1: {(half_time - start_time):.3f}")
         print(f"T2: {end_time - half_time:.3f}\n")
         for key, value in MEM_INFO.items():
             print(f"{key}: {value:>16}")
+        processors = getInfoProcessor()
+        for processor in processors:
+            for key, value in processor.items():
+                print(f"{key}: {value}")
     def clickedevent():
         update()
     # Botão para mostrar item selecionado

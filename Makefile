@@ -11,4 +11,3 @@ uninstall:
 	$(PIP) uninstall -r $(REQUIREMENTS)
 clean:
 	rm -rf __pycache__
-

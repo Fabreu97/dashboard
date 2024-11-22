@@ -5,6 +5,7 @@ MAX_ATTEMPS: int = 3
 PAGE_SIZE = 4096
 CONSTANTE_MULTIPLICATIVA_MEMORIA = ["B", "KB", "MB", "GB", "TB"]
 MEM_INFO: dict = {}
+PARENT_PROCESS = []
 
 # Dicionario com as informações do processo
 # [0]*PID       = Id do processo
@@ -48,6 +49,7 @@ MEM_INFO: dict = {}
 # [33]WCHAN     = Este é o canal no qual o processo fica esperando. Este é o endereço da chamada ao sistema, e pode ser analisada em uma lista de nomes, caso se necessite de um nome textual (caso se tenha um /etc/psdatabase atualizado, então tente ps -l para ver o campo WCHAN em ação).
 proc = '/proc'
 memory = 'meminfo'
+
 # ID : int
 # name : str
 class Process:
@@ -73,7 +75,7 @@ class Process:
         self.start_time = start_time
         self.vsize = vsize
         i: int = 0
-        self.memory_kb = 4096*RSS
+        self.memory_b = 4096*RSS
         rss_bytes: float = 4096*RSS
         while(rss_bytes/1024 > 1.0):
             rss_bytes = rss_bytes/1024
@@ -93,14 +95,14 @@ class Process:
     def addProcessChildren(self, vprocess) -> None:
         self.children.append(vprocess)
     def getMemory(self) -> int:
-        memory: int = self.memory_kb
+        memory: int = self.memory_b
         for p in self.children:
-            memory += p.getMemory_KB()
+            memory += p.getMemory()
         return memory
-    def getMemory_KB(self) -> int:
-        return self.memory_kb
+    def getMemory_B(self) -> int:
+        return self.memory_b
     def updateMemoryTotal(self) -> None:
-        self.memory_total = convertUnidade('KB', self.getMemory())
+        self.memory_total = convertUnidade('B', self.getMemory())
     def getMemoryTotal(self) -> str:
         return self.memory_total
 # end of class VProcess
@@ -178,4 +180,25 @@ def convertUnidade(cmc: str, value: int) -> str:
         i += 1
     result  = f"{v:.2f}{CONSTANTE_MULTIPLICATIVA_MEMORIA[i]}"
     return result
-    
+
+def getInfoProcessor() -> list:
+    path = f"/proc/cpuinfo"
+    processors: list = []
+    try:
+        with open(path, "r") as file:
+            processor_info: dict = {}
+            for line in file:
+                if(line.strip() != ''):
+                    index: int = line.find(":")
+                    key: str = line[:index].strip()
+                    value: str = line[index+1:].strip()
+                    if(key == 'processor'):
+                        if processor_info:
+                            processors.append(processor_info)
+                        processor_info = {}
+                    processor_info[key] = value
+    except Exception as e:
+        print(f"ERROR getInfoProcessor: {e}")
+        return None
+    finally:
+        return processors
