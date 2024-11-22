@@ -5,6 +5,8 @@ from process import Process
 class ProcessList:
     def __init__(self) -> None:
         self.processes: list = []
+    def empty(self) -> bool:
+        return self.processes == []
     def getInfo(self) -> list:
         return self.processes
     def addProcess(self, process: Process) -> None:

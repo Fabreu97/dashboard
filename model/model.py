@@ -52,7 +52,7 @@ class Model:
     def getSizeLimit(self) -> int:
         return self.history.getSizeLimit()
     def updateProcesses(self) -> None:
-        if self.currentProcesses is not None:
+        if not self.currentProcesses.empty():
             self.history.addProcessList(self.currentProcesses)
             self.currentProcesses = ProcessList()
         pids = []
