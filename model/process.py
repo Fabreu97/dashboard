@@ -1,10 +1,11 @@
+# Classe para agrupar as informações de um processo.
 
 STORAGE_UNITS = ("B", "KB", "MB", "GB", "TB")
 
 # TODO: find a way to find uot how much time a process consumes on the Process class
 
 class Process:
-    def __init__(self, PID : int, command: str, state: str, PPID: int, RSS: int):
+    def __init__(self, PID : int, command: str, state: str, PPID: int, RSS: int) -> None:
         self.PID = PID
         self.command = command
         if (state=='R'):
