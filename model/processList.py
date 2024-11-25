@@ -1,16 +1,21 @@
-# Classe para agrupar uma lista de processo
-
+# Class to group a list of processes.
+# Author: Fernando Abreu
+# Date: 11/23/2024
+###################################################################################################
+# IMPORT
 from process import Process
-
+###################################################################################################
 class ProcessList:
-    def __init__(self) -> None:
+    def __init__(self):
         self.processes: list = []
     def empty(self) -> bool:
         return self.processes == []
     def getInfo(self) -> list:
         return self.processes
     def addProcess(self, process: Process) -> None:
-        self.findProcess(process.getParent()).addProcessChildren(process)
+        parent: Process = self.findProcess(process.getParent())
+        if parent is not None:
+            parent.addProcessChildren(process)
         self.processes.append(process)
     def findProcess(self, target: int) -> Process | None:
         begin: int = 0
@@ -19,7 +24,7 @@ class ProcessList:
         position: int = -1
         pid: int = 0
         while( (begin < end) and not flag ):
-            position = (begin + end)/2
+            position = (begin + end)//2
             pid = self.processes[position].getPID()
             if(pid == target):
                 flag = True
@@ -53,4 +58,3 @@ class ProcessList:
         if(position != -1):
             del self.processes[position]
 # end of the class ProcessList
-    

@@ -1,9 +1,13 @@
-# Classe para agrupar uma lista de Processos no tempo
-
+# Class to group a list of processes over time.
+# Author: Fernando Abreu
+# Date: 11/23/2024
+###################################################################################################
+# IMPORT
 from processList import ProcessList
-
+###################################################################################################
+# MACROS
 SIZE_LIMIT: int = 60
-
+###################################################################################################
 class ProcessHistory:
     def __init__(self) -> None:
         self.history: list = []
@@ -19,3 +23,4 @@ class ProcessHistory:
             self.sizeLimit = limit
     def getSizeLimit(self) -> int:
         return self.sizeLimit
+# END OF THE CLASS PROCESS_HISTORY
