@@ -31,7 +31,9 @@ class HardwareStats:
                 for line in file:
                     index: int = line.find(":")
                     key: str = line[:index].strip()
-                    self.__memory_info[key] = convertToLargestUnit('KB',int(''.join(filter(str.isdigit, line))))
+                    value: int = line[index+1:].strip().split()[0]
+                    #self.__memory_info[key] = convertToLargestUnit('KB',int(''.join(filter(str.isdigit, line))))
+                    self.__memory_info[key] = value
         except Exception as e:
             print(f"Error initial HardwareStats in the path {path}: {e}")
         path = f"/proc/cpuinfo"
@@ -67,8 +69,12 @@ class HardwareStats:
                 idle_time = float(info[1])
                 su = system_uptime - self.__system_uptime
                 it = idle_time - self.__idle_time
-                time_total = len(self.__processors_info)
-            self.__cpu_usage = (time_total * su - it) / time_total
+                time_total = len(self.__processors_info)*su
+            if len(self.__cpu_usage) == self.__limit_metric:
+                del self.__cpu_usage[0]
+            self.__cpu_usage.append((time_total - it) / time_total)
+            self.__system_uptime = system_uptime
+            self.__idle_time = idle_time
         except Exception as e:
             print(f"ERROR updateStats of Hardware Stats in the path {path}: {e}")
         path = "/proc/meminfo"
@@ -80,13 +86,18 @@ class HardwareStats:
                     if key == "MemFree":
                         value: int = int(line[index+1:].strip().split()[0])
                         break
-            self.__memory_usage.append(convertToLargestUnit("KB", value))
+            if len(self.__memory_usage) == self.__limit_metric:
+                del self.__memory_usage[0]
+            value = int(self.__memory_info["MemTotal"]) - value
+            self.__memory_usage.append(convertToLargestUnit("KB",value))
         except Exception as e:
-            pass
+            print(f"ERROR updateStats of Hardware Stats in the path {path}: {e}")
+    def getMemoryInfo(self) -> dict:
+        return self.__memory_info
     def getCpuUsageCurrent(self) -> str:
-        return f"{self.__cpu_usage[-1]*100}%"
+        return f"{self.__cpu_usage[-1]*100:.2f}%"
     def getMemoryUsageCurrent(self) -> str:
-        pass
+        return f"{self.__memory_usage[-1]}"
     def getCpuUsage(self) -> list:
         return self.__cpu_usage
     def getMemoryUsage(self) -> list:
@@ -96,3 +107,15 @@ class HardwareStats:
     def getLimitMetric(self) -> int:
         return self.__limit_metric
 # end of the class HardwareStats
+
+# Test of class
+if __name__=='__main__':
+    stats: HardwareStats = HardwareStats()
+    while(True):
+        start = time.time()
+        end = start
+        while((end - start) < 1):
+            end = time.time()
+        stats.updateStats()
+        print(f"CPU usage:{stats.getCpuUsageCurrent()}")
+        print(f"Memory usage: {stats.getMemoryUsageCurrent()}")

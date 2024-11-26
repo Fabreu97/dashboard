@@ -87,3 +87,8 @@ def convertToLargestUnit(cmc: str, value: int) -> str:
         i += 1
     result  = f"{v:.2f}{STORAGE_UNITS[i]}"
     return result
+def convertToKB(cmc: str, value: str) -> int:
+    i = STORAGE_UNITS.index(value[-2:])
+    v = int(value[:-2])
+    while(i != 1):
+        pass
