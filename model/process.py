@@ -16,9 +16,9 @@ STORAGE_UNITS = ("B", "KB", "MB", "GB", "TB")
 #       - Z: Zumbi      -> termino de ser executado, mas ainda não foi removido na tabela de processos
 #       - T: Stopped    -> processo paralizado
 #       - I: Idle       -> processo inativo
-#   PPID: Processo pai
-#   RSS: uso de memoria residente(stats é dado por páginas e status é dado em KB)
-#   wchan: canal de espera, mostra o que o processo esta aguardando
+#   PPID: (Parent Process ID)Processo pai
+#   RSS: (Resident Set Size)uso de memoria residente(stats é dado por páginas e status é dado em KB)
+#   wchan: (Wait Channel)canal de espera, mostra o que o processo esta aguardando
 #   cmdline: linha de comando da execução do processo
 #   threads: Número de threads no processo
 ###################################################################################################
@@ -44,7 +44,7 @@ class Process:
         self.children: list = []
         self.wchan = ""
         self.cmdline = ""
-        self.threads = 0
+        self.threads = 1
     def getPID(self) -> int:
         return self.PID
     def getCommand(self) -> str:
@@ -81,6 +81,7 @@ def convertToLargestUnit(cmc: str, value: int) -> str:
         i = STORAGE_UNITS.index(cmc)
     except ValueError:
         print(f"Elemento não encontrado: {cmc}")
+        return "Erro convertToLargestUnit"
     v = value
     while(float(v/1024) >= 1.0):
         v = v/1024

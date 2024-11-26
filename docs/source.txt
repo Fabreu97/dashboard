@@ -1,0 +1,7 @@
+CPU:
+    CPU usage: https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/6/html/deployment_guide/s2-proc-uptime#s2-proc-uptime
+    cpuinfo: https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/6/html/deployment_guide/s2-proc-cpuinfo#s2-proc-cpuinfo
+Memory:
+    meminfo: 
+Processes:
+    overview: https://blog.4linux.com.br/conheca-kernel-linux-pelo-proc-parte-1/

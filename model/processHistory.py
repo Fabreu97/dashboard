@@ -1,6 +1,7 @@
 # Class to group a list of processes over time.
-# Author: Fernando Abreu
-# Date: 11/23/2024
+# Author: Fernando Abreu e Augusto Rosa
+# Date: 11/26/2024
+# TODO getInfo()
 ###################################################################################################
 # IMPORT
 from processList import ProcessList

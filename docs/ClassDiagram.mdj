@@ -65,7 +65,7 @@
 											"parentStyle": true,
 											"left": 525,
 											"top": 62,
-											"width": 1695,
+											"width": 2471,
 											"height": 24,
 											"text": "Dashboard"
 										},
@@ -106,7 +106,7 @@
 									"parentStyle": true,
 									"left": 520,
 									"top": 55,
-									"width": 1705,
+									"width": 2481,
 									"height": 36,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAGTUFlUsU4hxEY="
@@ -136,8 +136,8 @@
 							"containerChangeable": true,
 							"left": 520,
 							"top": 40,
-							"width": 1704,
-							"height": 1176,
+							"width": 2480,
+							"height": 1568,
 							"nameCompartment": {
 								"$ref": "AAAAAAGTUFlUsU4gKQI="
 							}
@@ -3487,7 +3487,7 @@
 											"parentStyle": true,
 											"left": 1853,
 											"top": 702,
-											"width": 335,
+											"width": 919,
 											"height": 18,
 											"text": "View"
 										},
@@ -3502,7 +3502,7 @@
 											"parentStyle": true,
 											"left": 1853,
 											"top": 722,
-											"width": 335,
+											"width": 919,
 											"height": 18,
 											"text": "(from Dashboard)"
 										},
@@ -3527,7 +3527,7 @@
 									"parentStyle": true,
 									"left": 1848,
 									"top": 695,
-									"width": 345,
+									"width": 929,
 									"height": 50,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAGTVSz+z3siSgQ="
@@ -3552,8 +3552,8 @@
 							"containerChangeable": true,
 							"left": 1848,
 							"top": 680,
-							"width": 344,
-							"height": 384,
+							"width": 928,
+							"height": 422,
 							"showNamespace": true,
 							"nameCompartment": {
 								"$ref": "AAAAAAGTVSz+z3shsxY="
@@ -3604,7 +3604,7 @@
 											"parentStyle": true,
 											"left": 1853,
 											"top": 166,
-											"width": 327,
+											"width": 728,
 											"height": 18,
 											"text": "Controller"
 										},
@@ -3619,7 +3619,7 @@
 											"parentStyle": true,
 											"left": 1853,
 											"top": 186,
-											"width": 327,
+											"width": 728,
 											"height": 18,
 											"text": "(from Dashboard)"
 										},
@@ -3644,7 +3644,7 @@
 									"parentStyle": true,
 									"left": 1848,
 									"top": 159,
-									"width": 337,
+									"width": 738,
 									"height": 50,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAGTVS1c/4GtuiY="
@@ -3666,7 +3666,7 @@
 							"containerChangeable": true,
 							"left": 1848,
 							"top": 144,
-							"width": 336,
+							"width": 737,
 							"height": 475,
 							"showNamespace": true,
 							"nameCompartment": {
@@ -5141,7 +5141,7 @@
 							"font": "Arial;13;0",
 							"parentStyle": false,
 							"left": 520,
-							"top": 1056,
+							"top": 1448,
 							"width": 768,
 							"height": 160
 						},
@@ -5155,7 +5155,7 @@
 							"font": "Arial;13;0",
 							"parentStyle": false,
 							"left": 552,
-							"top": 1104,
+							"top": 1496,
 							"width": 72,
 							"height": 72
 						},
@@ -5169,7 +5169,7 @@
 							"font": "Arial;20;0",
 							"parentStyle": false,
 							"left": 640,
-							"top": 1120,
+							"top": 1512,
 							"width": 106.71875,
 							"height": 32,
 							"text": "Completed"
@@ -5184,7 +5184,7 @@
 							"font": "Arial;13;0",
 							"parentStyle": false,
 							"left": 792,
-							"top": 1104,
+							"top": 1496,
 							"width": 72,
 							"height": 72
 						},
@@ -5198,7 +5198,7 @@
 							"font": "Arial;20;0",
 							"parentStyle": false,
 							"left": 880,
-							"top": 1120,
+							"top": 1512,
 							"width": 106.71875,
 							"height": 32,
 							"text": "InProgress"
@@ -5213,7 +5213,7 @@
 							"font": "Arial;13;0",
 							"parentStyle": false,
 							"left": 1016,
-							"top": 1104,
+							"top": 1496,
 							"width": 72,
 							"height": 72
 						},
@@ -5227,7 +5227,7 @@
 							"font": "Arial;20;0",
 							"parentStyle": false,
 							"left": 1104,
-							"top": 1120,
+							"top": 1512,
 							"width": 106.71875,
 							"height": 32,
 							"text": "NotStarted"
@@ -5240,8 +5240,8 @@
 							},
 							"font": "Arial;13;0",
 							"parentStyle": false,
-							"left": 1672,
-							"top": 1080,
+							"left": 2440,
+							"top": 1472,
 							"width": 552,
 							"height": 136
 						},
@@ -5254,8 +5254,8 @@
 							"fillColor": "#A3FFA3",
 							"font": "Arial;26;0",
 							"parentStyle": false,
-							"left": 1688,
-							"top": 1120,
+							"left": 2464,
+							"top": 1520,
 							"width": 496,
 							"height": 40,
 							"text": "Authors: Augusto Rosa e Fernando Abreu"

@@ -94,6 +94,8 @@ class HardwareStats:
             print(f"ERROR updateStats of Hardware Stats in the path {path}: {e}")
     def getMemoryInfo(self) -> dict:
         return self.__memory_info
+    def getProcessorsInfo(self) -> list:
+        return self.__processors_info
     def getCpuUsageCurrent(self) -> str:
         return f"{self.__cpu_usage[-1]*100:.2f}%"
     def getMemoryUsageCurrent(self) -> str:
@@ -114,8 +116,14 @@ if __name__=='__main__':
     while(True):
         start = time.time()
         end = start
-        while((end - start) < 1):
+        while((end - start) < 1.0):
             end = time.time()
+        s = time.time()
         stats.updateStats()
+        e = time.time()
+        print(f"Elapsed Time to updateStats: {float(e-s)*1000: .2f}ms")
         print(f"CPU usage:{stats.getCpuUsageCurrent()}")
         print(f"Memory usage: {stats.getMemoryUsageCurrent()}")
+        # print(stats.getMemoryInfo()["MemTotal"])
+        print(f"Memory Total: {convertToLargestUnit('KB', int(stats.getMemoryInfo()['MemTotal']))}")
+        print("===========================================")

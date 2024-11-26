@@ -1,73 +1,48 @@
 # Class to model all data in the MVC design pattern.
-# Author: Fernando Abreu
+# Author: Fernando Abreu e Augusto Rosa
 # Date: 11/23/2024
 ###################################################################################################
 # IMPORT
 import os
 import time
-from processHistory import ProcessHistory
-from processList import ProcessList
-from process import convertToLargestUnit
 from process import Process
+from process import convertToLargestUnit
+from processList import ProcessList
+from processHistory import ProcessHistory
+from hardwareStats import HardwareStats
 ###################################################################################################
-# MACROS
+# MACROS : podem virar constante de classe com uso da @property
 PID: int = 0
 COMMAND: int = 1
 STATE: int = 2
 PPID: int = 3
 RSS: int = 23
+READ: str = "r"
 ###################################################################################################
 class Model:
     def __init__(self):
         self.currentProcesses = ProcessList()
         self.history = ProcessHistory()
-        self.mem_info: dict = {}
-        self.processors_info: list = []
-    def initialSetup(self) -> None:
-        path: str = "/proc/meminfo"
-        try:
-            with open(path, "r") as file:
-                for line in file:
-                    index: int = line.find(":")
-                    key: str = line[:index].strip()
-                    self.mem_info[key] = convertToLargestUnit('KB',int(''.join(filter(str.isdigit, line))))
-        except Exception as e:
-            print(f"Error {path}: {e}")
-        path = f"/proc/cpuinfo"
-        try:
-            with open(path, "r") as file:
-                processor_info: dict = {}
-                for line in file:
-                    if(line.strip() != ''):
-                        index: int = line.find(":")
-                        key: str = line[:index].strip()
-                        value: str = line[index+1:].strip()
-                        if(key == 'processor'):
-                            if processor_info:
-                                self.processors_info.append(processor_info)
-                            processor_info = {}
-                        processor_info[key] = value
-        except Exception as e:
-            print(f"ERROR getInfoProcessor: {e}")
-            return None
-    def getProcessorInfo(self) -> list:
-        return self.processors_info
+        self.__hardware_stats = HardwareStats()
+    def getProcessorsInfo(self) -> list:
+        return self.__hardware_stats.getProcessorsInfo()
     def getMemoryInfo(self) -> dict:
-        return self.mem_info
+        return self.__hardware_stats.getMemoryInfo()
+    def getCpuUsageCurrent(self) -> str:
+        return self.__hardware_stats.getCpuUsageCurrent()
+    def getMemoryUsageCurrent(self) -> str:
+        return self.__hardware_stats.getMemoryUsageCurrent()
+    def getCpuUsage(self) -> list:
+        return self.__hardware_stats.getCpuUsage()
+    def getMemoryUsage(self) -> list:
+        return self.__hardware_stats.getMemoryUsage()
     def setSizeLimit(self, limit: int) -> None:
-        self.history.setSizeLimit(limit) 
+        self.__hardware_stats.setLimitMetric(limit)
+        self.history.setSizeLimit(limit)
     def getSizeLimit(self) -> int:
         return self.history.getSizeLimit()
-    def updateMemoryInfo(self) -> None:
-        path: str = "/proc/meminfo"
-        try:
-            with open(path, "r") as file:
-                for line in file:
-                    index: int = line.find(":")
-                    key: str = line[:index].strip()
-                    self.mem_info[key] = convertToLargestUnit('KB',int(''.join(filter(str.isdigit, line))))
-        except Exception as e:
-            print(f"Error {path}: {e}")
+    def updateHardwareStats(self) -> None:
+        self.__hardware_stats.updateStats()
     def updateProcessesByStats(self) -> None:
         if not self.currentProcesses.empty():
             self.history.addProcessList(self.currentProcesses)
@@ -100,6 +75,7 @@ class Model:
         for pid in pids:
             path = f"/proc/{pid}/status"
             info: dict = {}
+            process: Process
             try:
                 with open(path, "r") as file:
                     for line in file:
@@ -121,10 +97,33 @@ class Model:
                 print(f"Erro updateProcesses2({pid}): {e}")
                 continue
             if(info["State"] == 'S' or info["State"] == 'D'):
-                pass
-                
+                path = f"/proc/{pid}/wchan"
+                try:
+                    with open(path, READ) as file:
+                        process.setWaitChannel(str(file.readline()).split())
+                except Exception as e:
+                    print(f"Erro: {e}")
     def updateProcessesOtherInfo(self) -> None:
         pass
+    def update(self):
+        self.updateHardwareStats()
+        self.updateProcessesByStatus()
     def getInfoProcesses(self) -> list:
         return self.currentProcesses.getInfo()
 # end of the class Model
+
+# Test of class or unit test
+if __name__=="__main__":
+    model: Model = Model()
+    start = time.time()
+    end = time.time()
+    while ((end - start) < 1.0):
+        end = time.time()
+    model.update()
+    info_processes = model.getInfoProcesses()
+    for p in info_processes:
+        info = p.getInfo()
+        print(f"{info[0]:^8} {info[1]:^35} {info[2]:^12} {info[3]:^8} {info[4]:^8} ")
+        print("")
+    print(f"CPU usage: {model.getCpuUsageCurrent()}")
+    print(f"Memory usage: {model.getMemoryUsageCurrent()}")
