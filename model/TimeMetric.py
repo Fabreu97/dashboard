@@ -3,12 +3,13 @@
 # Date: 11/25/2024
 ###################################################################################################
 # IMPORT
+import time
 ###################################################################################################
 # MACROS
 
 ###################################################################################################
 class TimeMetric:
-    def __init__(self, metric: float, time: float) -> None:
+    def __init__(self, metric: float, time: float = time.time()) -> None:
         self.__metric: float = metric
         self.__time: float = time
     def setMetric(self, metric: float) -> None:

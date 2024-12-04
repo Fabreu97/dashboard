@@ -4,17 +4,17 @@ Este projeto foi desenvolvido para a discipĺina de Sistemas Operacionais e tem 
 ## Índice
 1. [Sobre o Projeto](#sobre-o-projeto)<br>
 1.1. [Obtenção das informações do Sistema](#obtencao-das-informações-do-sistema)<br>
-1.1.1 [Pasta /proc](#pasta-/proc)<br>
+1.1.1. [Pasta /proc](#pasta-/proc)<br>
 1.1.2. [Processador](#processador)<br>
 1.1.3. [Memoria RAM](#memoria-ram)<br>
 1.1.4. [Processos](#processos)<br>
 1.2. [Diagrama de Classe](#diagrama-de-classe)
 2. [Como Usar](#como-usar)<br>
-2.1 [Como executar o dashboard](#como-executar-o-dashboard)<br>
+2.1. [Como executar o dashboard](#como-executar-o-dashboard)<br>
 2.1.1 [Passos](#passos)
 3. [Estrutura de Pastas](#estrutura-de-pastas)
 4. [Contribuições](#contribuição)<br>
-4.1 [Como Contribuir](como-contribuir)
+4.1. [Como Contribuir](como-contribuir)
 5. [Licença](#licença)
 
 ## Sobre o Projeto

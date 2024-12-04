@@ -6,6 +6,9 @@
 import time
 from TimeMetric import TimeMetric
 from process import convertToLargestUnit
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.ticker import PercentFormatter
 ###################################################################################################
 # MACROS
 limit_metric: int = 60
@@ -89,7 +92,7 @@ class HardwareStats:
             if len(self.__memory_usage) == self.__limit_metric:
                 del self.__memory_usage[0]
             value = int(self.__memory_info["MemTotal"]) - value
-            self.__memory_usage.append(convertToLargestUnit("KB",value))
+            self.__memory_usage.append(value)
         except Exception as e:
             print(f"ERROR updateStats of Hardware Stats in the path {path}: {e}")
     def getMemoryInfo(self) -> dict:
@@ -99,7 +102,7 @@ class HardwareStats:
     def getCpuUsageCurrent(self) -> str:
         return f"{self.__cpu_usage[-1]*100:.2f}%"
     def getMemoryUsageCurrent(self) -> str:
-        return f"{self.__memory_usage[-1]}"
+        return f"{convertToLargestUnit('KB',self.__memory_usage[-1])}"
     def getCpuUsage(self) -> list:
         return self.__cpu_usage
     def getMemoryUsage(self) -> list:
@@ -113,6 +116,12 @@ class HardwareStats:
 # Test of class
 if __name__=='__main__':
     stats: HardwareStats = HardwareStats()
+    # Ativa o modo interativo
+    plt.ion()
+    plt.title("CPU Usage in %")
+    plt.xlabel("time")
+    plt.ylabel("CPU USAGE %")
+    plt.gca().yaxis.set_major_formatter(PercentFormatter(xmax=1))
     while(True):
         start = time.time()
         end = start
@@ -121,9 +130,25 @@ if __name__=='__main__':
         s = time.time()
         stats.updateStats()
         e = time.time()
+        cpu_usage = stats.getCpuUsage()
+        x = range(0,len(cpu_usage))
+        #cpu_usage = [i * 100 for i in cpu_usage]
+        plt.clf()
+        plt.plot(x, cpu_usage)
+        plt.grid(True, color='darkBlue', linestyle='--', linewidth=0.5)
+        plt.title("CPU Usage in %")
+        plt.xlabel("time")
+        plt.ylabel("CPU USAGE %")
+        plt.gca().yaxis.set_major_formatter(PercentFormatter(xmax=1))
+        plt.draw()
+        plt.show()
+        plt.pause(0.1)
+            
         print(f"Elapsed Time to updateStats: {float(e-s)*1000: .2f}ms")
         print(f"CPU usage:{stats.getCpuUsageCurrent()}")
         print(f"Memory usage: {stats.getMemoryUsageCurrent()}")
         # print(stats.getMemoryInfo()["MemTotal"])
         print(f"Memory Total: {convertToLargestUnit('KB', int(stats.getMemoryInfo()['MemTotal']))}")
         print("===========================================")
+    plt.ioff()
+    plt.show()
