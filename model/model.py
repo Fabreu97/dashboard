@@ -9,14 +9,53 @@ from process import Process
 from process import convertToLargestUnit
 from processList import ProcessList
 from processHistory import ProcessHistory
-from hardwareStats import HardwareStats
+from hardwareStats import HardwareStats, STANDARD_TIME_JIFFY
 ###################################################################################################
 # MACROS : podem virar constante de classe com uso da @property
+## MACROS para o arquivo /proc/[PID]/stat
 PID: int = 0
 COMMAND: int = 1
 STATE: int = 2
 PPID: int = 3
+PGRP: int = 4
+SESSION: int = 5
+TTY_NR: int = 6
+TPGID: int = 7
+FLAGS: int = 8
+MINFLT: int = 9
+CMINFLT: int = 10
+MAJFLT: int = 11
+CMAJFLT: int = 12
+UTIME: int = 13
+STIME: int = 14
+CUTIME: int = 15
+CSTIME: int = 16
+PRIORITY: int = 17
+NICE: int = 18
+THREADS: int = 19
+ITREALVALUE: int = 20
+START_TIME: int = 21
+VSIZE: int = 22
 RSS: int = 23
+RSSLIM: int = 24
+START_CODE: int  = 25
+END_CODE: int = 26
+START_STACK: int = 27
+KSTKESP: int = 28
+KSTKEIP: int = 29
+SIGNAL: int = 30
+BLOCKED: int = 31
+# ...
+## MACROS para o arquivo /proc/[PID]/statm
+SIZE: int = 0
+RESIDENT: int = 1
+SHARED: int = 2
+TEXT: int = 3
+LIB: int = 4
+DATA: int = 5
+DIRTY_PAGES: int = 6
+## MACROS SISTEMAS
+PAGE_SIZE_KB: int = 4
 READ: str = "r"
 ###################################################################################################
 # INFORMATION
@@ -63,11 +102,22 @@ class Model:
                     pids.append(name_dir)
         for pid in pids:
             try:
-                with open(f"/proc/{pid}/stat", "r") as file:
+                path = f"/proc/{pid}/stat"
+                with open(path, READ) as file:
                     process_info = file.readline().strip().split()
-                    self.currentProcesses.addProcess(Process(int(process_info[PID]), str(process_info[COMMAND]), str(process_info[STATE]), int(process_info[PPID]), int(process_info[RSS])))
+                    execution_time: float = ( int(process_info[UTIME]) + int(process_info[STIME]) + int(process_info[CUTIME]) + int(process_info[CSTIME]) ) * STANDARD_TIME_JIFFY
+                    process: Process = Process(int(process_info[PID]), str(process_info[COMMAND]), str(process_info[STATE]), int(process_info[PPID]), int(process_info[RSS])*PAGE_SIZE_KB, execution_time)
+                    process.setThreads(process_info[THREADS])
+                    self.currentProcesses.addProcess(process)
+                path = f"/proc/{pid}/wchan"
             except Exception as e:
-                print(f"ERROR({pid}): {e}")
+                print(f"ERROR({pid}) {path}: {e}")
+            if process_info[STATE] == 'S' or process_info[STATE] == 'D':
+                try:
+                    with open(path, READ) as file:
+                        process.setWaitChannel(str(file.readline()).strip())
+                except Exception as e:
+                    print(f"Erro {path}: {e}")
     def updateProcessesByStatus(self) -> None:
         if not self.currentProcesses.empty():
             self.history.addProcessList(self.currentProcesses)
@@ -114,7 +164,7 @@ class Model:
         pass
     def update(self):
         self.updateHardwareStats()
-        self.updateProcessesByStatus()
+        self.updateProcessesByStats()
     def getInfoProcesses(self) -> list:
         return self.currentProcesses.getInfo()
 # end of the class Model

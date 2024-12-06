@@ -2,6 +2,9 @@
 # Author: Fernando Abreu
 # Date: 11/23/2024
 ###################################################################################################
+# IMPORT
+import time
+###################################################################################################
 # MACROS:
 STORAGE_UNITS = ("B", "KB", "MB", "GB", "TB")
 ###################################################################################################
@@ -23,56 +26,64 @@ STORAGE_UNITS = ("B", "KB", "MB", "GB", "TB")
 #   threads: Número de threads no processo
 ###################################################################################################
 class Process:
-    def __init__(self, PID : int, command: str, state: str, PPID: int, RSS: int):
-        self.PID = PID
-        self.command = command
+    def __init__(self, PID : int, command: str, state: str, PPID: int, RSS: int, execution_time: float = 0.0):
+        self.__PID = PID
+        self.__command = command
         if (state=='R'):
-            self.state = "Execução"
+            self.__state = "Execução"
         elif(state == 'S' or state == 'D'):
-            self.state = "Aguardando"
+            self.__state = "Aguardando"
         elif(state == 'Z'):
-            self.state = "Zumbi"
+            self.__state = "Zumbi"
         elif(state == 'T'):
-            self.state = "Paralisado"
+            self.__state = "Paralisado"
         elif(state == 'I'):
-            self.state = "Inativo"
+            self.__state = "Inativo"
         else:
-            self.state = "Desconhecido"
-        self.PPID = PPID
-        self.RSS = RSS
-        self.memory = convertToLargestUnit('KB', RSS)
-        self.children: list = []
-        self.wchan = ""
-        self.cmdline = ""
-        self.threads = 1
+            self.__state = "Desconhecido"
+        self.__PPID = PPID
+        self.__RSS = RSS
+        self.__memory = convertToLargestUnit('KB', RSS)
+        self.__children: list = []
+        self.__wchan = ""
+        self.__cmdline = ""
+        self.__threads = 1
+        self.__execution_time = execution_time
+        self.__creation_time = time.time()
     def getPID(self) -> int:
-        return self.PID
+        return self.__PID
     def getCommand(self) -> str:
-        return self.command
+        return self.__command
     def getState(self) -> str:
-        return self.state
+        return self.__state
     def getParent(self) -> int:
-        return self.PPID
+        return self.__PPID
     def getRSS(self) -> int:
-        return self.RSS
+        return self.__RSS
     def getMemory(self) -> str:
-        return self.memory
+        return self.__memory
     def getInfo(self) -> list:
-        return [self.PID, self.command, self.state, self.PPID, self.memory]
+        return [self.__PID, self.__command, self.__state, self.__PPID, self.__memory]
     def addProcessChildren(self, process) -> None:
-        self.children.append(process)
+        self.__children.append(process)
     def setWaitChannel(self, wchan: str) -> None:
-        self.wchan = wchan
+        self.__wchan = wchan
     def getWaitChannel(self) -> str:
-        return self.wchan
+        return self.__wchan
     def setCommandLine(self, cmdline: str) -> None:
-        self.cmdline = cmdline
+        self.__cmdline = cmdline
     def getCommandLine(self) -> str:
-        return self.cmdline
+        return self.__cmdline
     def setThreads(self, threads: int) -> None:
-        self.threads = threads
+        self.__threads = threads
     def getThreads(self) -> int:
-        return self.threads
+        return self.__threads
+    def setExecutionTime(self, time: float) -> None:
+        self.__execution_time = time
+    def getExecutionTime(self) -> float:
+        return self.__execution_time
+    def getCreationTime(self) -> float:
+        return self.__creation_time
 # end of the class Process
 
 def convertToLargestUnit(cmc: str, value: int) -> str:
@@ -88,8 +99,12 @@ def convertToLargestUnit(cmc: str, value: int) -> str:
         i += 1
     result  = f"{v:.2f}{STORAGE_UNITS[i]}"
     return result
+
 def convertToKB(cmc: str, value: str) -> int:
     i = STORAGE_UNITS.index(value[-2:])
     v = int(value[:-2])
     while(i != 1):
         pass
+
+def getCpuUsage(previous: Process, present: Process) -> float:
+    return ((present.getExecutionTime() - previous.getExecutionTime()) / (present.getCreationTime() - previous.getCreationTime()))

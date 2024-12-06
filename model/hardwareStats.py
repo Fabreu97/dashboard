@@ -1,6 +1,6 @@
 # Class to group information of Hardware
 # Authors: Fernando Abreu e Augusto Rosa
-# Date: 12/05/2024
+# Date: 12/06/2024
 ###################################################################################################
 # IMPORT
 import os
@@ -14,7 +14,8 @@ from matplotlib.ticker import PercentFormatter
 # MACROS
 READ: str = "r"
 LIMIT_METRIC: int = 60
-STANDARD_JIFFY: float = os.sysconf("SC_CLK_TCK")
+CLOCK_TICK: int = os.sysconf("SC_CLK_TCK")
+STANDARD_TIME_JIFFY: float = 1/CLOCK_TICK
 CPU_USAGE_STATS: tuple = ('id_processor', 'user', 'nice', 'system', 'idle', 'iowait', 'irq', 'softirq', 'steal', 'guest', 'guest_nice')
 ###################################################################################################
 # INFORMATION
@@ -46,11 +47,13 @@ CPU_USAGE_STATS: tuple = ('id_processor', 'user', 'nice', 'system', 'idle', 'iow
 ###################################################################################################
 class HardwareStats:
     def __init__(self, limit: int = LIMIT_METRIC):
-        self.__jiffy: float = STANDARD_JIFFY
+        self.__jiffy: float = STANDARD_TIME_JIFFY
         self.__memory_info: dict = {}
         self.__processors_info: list = []
         self.__cpu_usage_total: list = []
         self.__cpu_usage_per_processor: list = []
+        self.__total_time_per_processor: list = []
+        self.__idle_time_per_processor: list = []
         self.__cpu_usage_stats_per_processor: list = []
         self.__memory_usage: list = []
         self.__system_uptime: float = 0.0
@@ -102,17 +105,21 @@ class HardwareStats:
                 for line in file:
                     data: list = line.strip().split()
                     stats: dict = {}
+                    total_time: float = 0.0
+                    idle_time: float = self.__jiffy * (int(data[4]) + int(data[5]))
                     cpu_ = data[0][:3]
                     if cpu_ == "cpu":
                         stats[CPU_USAGE_STATS[0]] = i
-                        
                         for j in range(1, len(CPU_USAGE_STATS)):
+                            total_time += self.__jiffy * int(data[j])
                             stats[CPU_USAGE_STATS[j]] = self.__jiffy * int(data[j])
                         self.__cpu_usage_stats_per_processor.append(stats)
+                        self.__total_time_per_processor.append(total_time)
+                        self.__idle_time_per_processor.append(idle_time)
+                        self.__cpu_usage_per_processor.append([])
                     else:
                         break
                     i += 1
-
         except Exception as e:
             print(f"ERROR initial Hardware Stats in the path {path}: {e}")
     def updateStats(self) -> None:
@@ -160,16 +167,24 @@ class HardwareStats:
                 i: int = 0
                 for line in file:
                     data: list = line.strip().split()
-                    stats: dict = {}
                     cpu_ = data[0][:3]
                     if cpu_ == "cpu":
-                        stats[CPU_USAGE_STATS[0]] = i
+                        total_time = 0.0
+                        idle_time = self.__jiffy * (int(data[4]) + int(data[5]))
                         for j in range(1, len(CPU_USAGE_STATS)):
-                            stats[CPU_USAGE_STATS[j]] = self.__jiffy * int(data[j])
-                        self.__cpu_usage_stats_per_processor.append(stats)
+                            total_time += self.__jiffy * int(data[j])
+                            self.__cpu_usage_stats_per_processor[i][CPU_USAGE_STATS[j]] = self.__jiffy * int(data[j])
+                        cpu_usage_per_processor = ((total_time - self.__total_time_per_processor[i]) - (idle_time - self.__idle_time_per_processor[i])) / (total_time - self.__total_time_per_processor[i])
+                        if len(self.__cpu_usage_per_processor[i]) == self.__limit_metric:
+                            del self.__cpu_usage_per_processor[i][0]
+                        self.__cpu_usage_per_processor[i].append(cpu_usage_per_processor)
+                        self.__total_time_per_processor[i] = total_time
+                        self.__idle_time_per_processor[i] = idle_time
                     else:
                         break
                     i += 1
+        except Exception as e:
+            print(f"ERROR updateStats of Hardware Stats in the path {path}: {e}")
     def getMemoryInfo(self) -> dict:
         return self.__memory_info
     def getProcessorsInfo(self) -> list:
@@ -188,10 +203,17 @@ class HardwareStats:
         return self.__limit_metric
     def getCpuUsageStatsPerProcessor(self) -> list:
         return self.__cpu_usage_stats_per_processor
+    def getCpuUsagePerProcessorCurrent(self) -> list:
+        ans: list = []
+        for i in range(1,len(self.__cpu_usage_per_processor)):
+            ans.append(self.__cpu_usage_per_processor[i][-1])
+        return ans 
+    def getCpuUsagePerProcessor(self) -> list:
+        return self.__cpu_usage_per_processor
 # end of the class HardwareStats
 
 # Test of class
-"""
+
 if __name__=='__main__':
     stats: HardwareStats = HardwareStats()
     # Ativa o modo interativo
@@ -209,6 +231,7 @@ if __name__=='__main__':
         stats.updateStats()
         e = time.time()
         cpu_usage = stats.getCpuUsage()
+        cpu_usage_per_processor: list = stats.getCpuUsagePerProcessor()
         x = range(0,len(cpu_usage))
         #cpu_usage = [i * 100 for i in cpu_usage]
         plt.clf()
@@ -224,10 +247,11 @@ if __name__=='__main__':
             
         print(f"Elapsed Time to updateStats: {float(e-s)*1000: .2f}ms")
         print(f"CPU usage:{stats.getCpuUsageCurrent()}")
+        for i,p in enumerate(cpu_usage_per_processor):
+            print(f"CPU{i} usage:{p[-1]*100:.1f}%")
         print(f"Memory usage: {stats.getMemoryUsageCurrent()}")
         # print(stats.getMemoryInfo()["MemTotal"])
         print(f"Memory Total: {convertToLargestUnit('KB', int(stats.getMemoryInfo()['MemTotal']))}")
         print("===========================================")
     plt.ioff()
     plt.show()
-"""
