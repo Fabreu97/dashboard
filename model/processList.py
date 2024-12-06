@@ -15,6 +15,7 @@ class ProcessList:
         self.__T: int = 0 # Stopped
         self.__I: int = 0 # Idle
         self.__U: int = 0 # Unknown
+        self.__total_threads: int = 0
     def empty(self) -> bool:
         return self.processes == []
     def getInfo(self) -> list:
@@ -37,6 +38,7 @@ class ProcessList:
         if parent is not None:
             parent.addProcessChildren(process)
         self.processes.append(process)
+        self.__total_threads += process.getThreads()
     def getRunningProcessCount(self) -> int:
         return self.__R
     def getSleepingProcessCount(self) -> int:
@@ -98,4 +100,6 @@ class ProcessList:
         self.__T = 0
         self.__I = 0
         self.__U = 0
+    def getTotalThreads(self) -> int:
+        return self.__total_threads
 # end of the class ProcessList

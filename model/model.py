@@ -5,8 +5,7 @@
 # IMPORT
 import os
 import time
-from process import Process
-from process import convertToLargestUnit
+from process import Process, getCpuUsage
 from processList import ProcessList
 from processHistory import ProcessHistory
 from hardwareStats import HardwareStats, STANDARD_TIME_JIFFY
@@ -63,13 +62,34 @@ READ: str = "r"
 
 class Model:
     def __init__(self):
-        self.currentProcesses = ProcessList()
+        self.__previousProcesses = ProcessList()
+        self.__currentProcesses = ProcessList()
         self.history = ProcessHistory()
         self.__hardware_stats = HardwareStats()
-    def getClockTick(self) -> int:
-        return self.__clk_tck
-    def getJiffie(self) -> float:
-        return self.__jiffy
+        pids = []
+        path = "/proc"
+        if os.path.exists(path):
+            dir_list = os.listdir(path)
+            for name_dir in dir_list:
+                if name_dir.isdigit():
+                    pids.append(name_dir)
+        for pid in pids:
+            try:
+                path = f"/proc/{pid}/stat"
+                with open(path, READ) as file:
+                    process_info = file.readline().strip().split()
+                    execution_time: float = STANDARD_TIME_JIFFY * ( int(process_info[UTIME]) + int(process_info[STIME]) )
+                    process: Process = Process(int(process_info[PID]), str(process_info[COMMAND]), str(process_info[STATE]), int(process_info[PPID]), int(process_info[RSS])*PAGE_SIZE_KB, int(process_info[THREADS]), execution_time)
+                    self.__currentProcesses.addProcess(process)
+            except Exception as e:
+                print(f"ERROR({pid}) {path}: {e}")
+            if process_info[STATE] == 'S' or process_info[STATE] == 'D':
+                try:
+                    path = f"/proc/{pid}/wchan"
+                    with open(path, READ) as file:
+                        process.setWaitChannel(str(file.readline()).strip())
+                except Exception as e:
+                    print(f"Erro {path}: {e}")
     def getProcessorsInfo(self) -> list:
         return self.__hardware_stats.getProcessorsInfo()
     def getMemoryInfo(self) -> dict:
@@ -90,9 +110,10 @@ class Model:
     def updateHardwareStats(self) -> None:
         self.__hardware_stats.updateStats()
     def updateProcessesByStats(self) -> None:
-        if not self.currentProcesses.empty():
-            self.history.addProcessList(self.currentProcesses)
-            self.currentProcesses = ProcessList()
+        if not self.__previousProcesses.empty():
+          self.history.addProcessList(self.__previousProcesses)
+        self.__previousProcesses = self.__currentProcesses
+        self.__currentProcesses = ProcessList()
         pids = []
         path = "/proc"
         if os.path.exists(path):
@@ -105,23 +126,26 @@ class Model:
                 path = f"/proc/{pid}/stat"
                 with open(path, READ) as file:
                     process_info = file.readline().strip().split()
-                    execution_time: float = ( int(process_info[UTIME]) + int(process_info[STIME]) + int(process_info[CUTIME]) + int(process_info[CSTIME]) ) * STANDARD_TIME_JIFFY
-                    process: Process = Process(int(process_info[PID]), str(process_info[COMMAND]), str(process_info[STATE]), int(process_info[PPID]), int(process_info[RSS])*PAGE_SIZE_KB, execution_time)
-                    process.setThreads(process_info[THREADS])
-                    self.currentProcesses.addProcess(process)
-                path = f"/proc/{pid}/wchan"
+                    execution_time: float = STANDARD_TIME_JIFFY * ( int(process_info[UTIME]) + int(process_info[STIME]) )
+                    process: Process = Process(int(process_info[PID]), str(process_info[COMMAND]), str(process_info[STATE]), int(process_info[PPID]), int(process_info[RSS])*PAGE_SIZE_KB, int(process_info[THREADS]), execution_time)
+                    self.__currentProcesses.addProcess(process)
             except Exception as e:
                 print(f"ERROR({pid}) {path}: {e}")
             if process_info[STATE] == 'S' or process_info[STATE] == 'D':
                 try:
+                    path = f"/proc/{pid}/wchan"
                     with open(path, READ) as file:
                         process.setWaitChannel(str(file.readline()).strip())
                 except Exception as e:
                     print(f"Erro {path}: {e}")
+            previousProcess = self.__previousProcesses.findProcess(int(pid))
+            if previousProcess is not None:
+                process.setCpuUsage(getCpuUsage(previousProcess, process))
     def updateProcessesByStatus(self) -> None:
-        if not self.currentProcesses.empty():
-            self.history.addProcessList(self.currentProcesses)
-            self.currentProcesses = ProcessList()
+        if not self.__previousProcesses.empty():
+          self.history.addProcessList(self.__previousProcesses)
+        self.__previousProcesses = self.__currentProcesses
+        self.__currentProcesses = ProcessList()
         pids: list = []
         path: str = "/proc"
         if os.path.exists(path):
@@ -149,7 +173,7 @@ class Model:
                         info["VmRSS"] = int(info["VmRSS"].split()[0])
                     process = Process(info["Pid"], info["Name"], info["State"], info["PPid"], info["VmRSS"])
                     process.setThreads(int(info["Threads"]))
-                    self.currentProcesses.addProcess(process)
+                    self.__currentProcesses.addProcess(process)
             except Exception as e:
                 print(f"Erro updateProcesses2({pid}): {e}")
                 continue
@@ -166,21 +190,24 @@ class Model:
         self.updateHardwareStats()
         self.updateProcessesByStats()
     def getInfoProcesses(self) -> list:
-        return self.currentProcesses.getInfo()
+        return self.__currentProcesses.getInfo()
 # end of the class Model
 
 # Test of class or unit test
 if __name__=="__main__":
     model: Model = Model()
-    start = time.time()
-    end = time.time()
-    while ((end - start) < 1.0):
-        end = time.time()
+    time.sleep(1)
+    start_time = time.time()
     model.update()
+    end_time = time.time()
     info_processes = model.getInfoProcesses()
+    cpu_usage_total: float = 0.0
     for p in info_processes:
         info = p.getInfo()
-        print(f"{info[0]:^8} {info[1]:^35} {info[2]:^12} {info[3]:^8} {info[4]:^8} ")
+        cpu_usage_total += info[5]
+        print(f"{info[0]:^8} {info[1]:^39} {info[2]:^12} {info[3]:^8} {info[4]:^8}  {info[5]*100:^4.1f}%")
         print("")
-    print(f"CPU usage: {model.getCpuUsageCurrent()}")
+    print(f"Elapsed Time for update: {(end_time - start_time)*1000:.1f}ms")
+    print(f"CPU usage by the sum of each process: {cpu_usage_total*100: .2f}%")
+    print(f"CPU usage Total: {model.getCpuUsageCurrent()}")
     print(f"Memory usage: {model.getMemoryUsageCurrent()}")

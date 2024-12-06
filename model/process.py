@@ -26,7 +26,7 @@ STORAGE_UNITS = ("B", "KB", "MB", "GB", "TB")
 #   threads: Número de threads no processo
 ###################################################################################################
 class Process:
-    def __init__(self, PID : int, command: str, state: str, PPID: int, RSS: int, execution_time: float = 0.0):
+    def __init__(self, PID : int, command: str, state: str, PPID: int, RSS: int, threads: int = 1, execution_time: float = 0.0):
         self.__PID = PID
         self.__command = command
         if (state=='R'):
@@ -47,9 +47,10 @@ class Process:
         self.__children: list = []
         self.__wchan = ""
         self.__cmdline = ""
-        self.__threads = 1
+        self.__threads = threads
         self.__execution_time = execution_time
         self.__creation_time = time.time()
+        self.__cpu_usage: float = 0.0
     def getPID(self) -> int:
         return self.__PID
     def getCommand(self) -> str:
@@ -63,7 +64,7 @@ class Process:
     def getMemory(self) -> str:
         return self.__memory
     def getInfo(self) -> list:
-        return [self.__PID, self.__command, self.__state, self.__PPID, self.__memory]
+        return [self.__PID, self.__command, self.__state, self.__PPID, self.__memory, self.__cpu_usage]
     def addProcessChildren(self, process) -> None:
         self.__children.append(process)
     def setWaitChannel(self, wchan: str) -> None:
@@ -84,6 +85,10 @@ class Process:
         return self.__execution_time
     def getCreationTime(self) -> float:
         return self.__creation_time
+    def setCpuUsage(self, cpu_usage: float) -> None:
+        self.__cpu_usage = cpu_usage
+    def getCpuUsage(self) -> float:
+        return self.__cpu_usage
 # end of the class Process
 
 def convertToLargestUnit(cmc: str, value: int) -> str:
@@ -107,4 +112,7 @@ def convertToKB(cmc: str, value: str) -> int:
         pass
 
 def getCpuUsage(previous: Process, present: Process) -> float:
-    return ((present.getExecutionTime() - previous.getExecutionTime()) / (present.getCreationTime() - previous.getCreationTime()))
+    cpu_usage = float((present.getExecutionTime() - previous.getExecutionTime()) / (present.getCreationTime() - previous.getCreationTime()))
+    if(cpu_usage < 0.0 or cpu_usage > 100):
+        return 0.0
+    return cpu_usage

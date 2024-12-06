@@ -15,7 +15,7 @@ from matplotlib.ticker import PercentFormatter
 READ: str = "r"
 LIMIT_METRIC: int = 60
 CLOCK_TICK: int = os.sysconf("SC_CLK_TCK")
-STANDARD_TIME_JIFFY: float = 1/CLOCK_TICK
+STANDARD_TIME_JIFFY: float = float(1/CLOCK_TICK)
 CPU_USAGE_STATS: tuple = ('id_processor', 'user', 'nice', 'system', 'idle', 'iowait', 'irq', 'softirq', 'steal', 'guest', 'guest_nice')
 ###################################################################################################
 # INFORMATION
@@ -190,7 +190,8 @@ class HardwareStats:
     def getProcessorsInfo(self) -> list:
         return self.__processors_info
     def getCpuUsageCurrent(self) -> str:
-        return f"{self.__cpu_usage_total[-1]*100:.2f}%"
+        # return f"{self.__cpu_usage_total[-1]*100:.2f}%"
+        return f"{self.__cpu_usage_per_processor[0][-1]*100:.2f}%"
     def getMemoryUsageCurrent(self) -> str:
         return f"{convertToLargestUnit('KB',self.__memory_usage[-1])}"
     def getCpuUsage(self) -> list:
@@ -236,7 +237,7 @@ if __name__=='__main__':
         #cpu_usage = [i * 100 for i in cpu_usage]
         plt.clf()
         plt.plot(x, cpu_usage)
-        plt.grid(True, color='darkBlue', linestyle='--', linewidth=0.5)
+        plt.grid(True, color='gray', linestyle='--', linewidth=0.5)
         plt.title("CPU Usage in %")
         plt.xlabel("time")
         plt.ylabel("CPU USAGE %")
