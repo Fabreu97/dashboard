@@ -1,7 +1,8 @@
 CPU:
     CPU usage: https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/6/html/deployment_guide/s2-proc-uptime#s2-proc-uptime
     cpuinfo: https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/6/html/deployment_guide/s2-proc-cpuinfo#s2-proc-cpuinfo
+    stat: https://man7.org/linux/man-pages/man5/proc_stat.5.html
 Memory:
-    meminfo: 
+    meminfo: command "man proc" at terminal
 Processes:
     overview: https://blog.4linux.com.br/conheca-kernel-linux-pelo-proc-parte-1/

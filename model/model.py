@@ -19,11 +19,18 @@ PPID: int = 3
 RSS: int = 23
 READ: str = "r"
 ###################################################################################################
+# INFORMATION
+###################################################################################################
+
 class Model:
     def __init__(self):
         self.currentProcesses = ProcessList()
         self.history = ProcessHistory()
         self.__hardware_stats = HardwareStats()
+    def getClockTick(self) -> int:
+        return self.__clk_tck
+    def getJiffie(self) -> float:
+        return self.__jiffy
     def getProcessorsInfo(self) -> list:
         return self.__hardware_stats.getProcessorsInfo()
     def getMemoryInfo(self) -> dict:
