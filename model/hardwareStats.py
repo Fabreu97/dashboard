@@ -237,8 +237,7 @@ if __name__=='__main__':
     while(True):
         start = time.time()
         end = start
-        while((end - start) < 1.0):
-            end = time.time()
+        time.sleep(1.0)
         s = time.time()
         stats.updateStats()
         e = time.time()
