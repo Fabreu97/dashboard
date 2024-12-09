@@ -1,8 +1,11 @@
 # Class to model all data in the MVC design pattern.
 # Author: Fernando Abreu e Augusto Rosa
-# Date: 11/23/2024
+# Date: 12/07/2024
 ###################################################################################################
 # IMPORT
+import matplotlib.pyplot as plt
+from matplotlib.ticker import PercentFormatter
+from datetime import datetime
 import os
 import time
 from process import Process, getCpuUsage
@@ -64,7 +67,7 @@ class Model:
     def __init__(self):
         self.__previousProcesses = ProcessList()
         self.__currentProcesses = ProcessList()
-        self.history = ProcessHistory()
+        self.__history = ProcessHistory()
         self.__hardware_stats = HardwareStats()
         pids = []
         path = "/proc"
@@ -104,14 +107,14 @@ class Model:
         return self.__hardware_stats.getMemoryUsage()
     def setSizeLimit(self, limit: int) -> None:
         self.__hardware_stats.setLimitMetric(limit)
-        self.history.setSizeLimit(limit)
+        self.__history.setSizeLimit(limit)
     def getSizeLimit(self) -> int:
-        return self.history.getSizeLimit()
+        return self.__history.getSizeLimit()
     def updateHardwareStats(self) -> None:
         self.__hardware_stats.updateStats()
     def updateProcessesByStats(self) -> None:
         if not self.__previousProcesses.empty():
-          self.history.addProcessList(self.__previousProcesses)
+          self.__history.addProcessList(self.__previousProcesses)
         self.__previousProcesses = self.__currentProcesses
         self.__currentProcesses = ProcessList()
         pids = []
@@ -131,19 +134,20 @@ class Model:
                     self.__currentProcesses.addProcess(process)
             except Exception as e:
                 print(f"ERROR({pid}) {path}: {e}")
-            if process_info[STATE] == 'S' or process_info[STATE] == 'D':
+            '''if process_info[STATE] == 'S' or process_info[STATE] == 'D':
                 try:
                     path = f"/proc/{pid}/wchan"
                     with open(path, READ) as file:
                         process.setWaitChannel(str(file.readline()).strip())
                 except Exception as e:
-                    print(f"Erro {path}: {e}")
+                    print(f"Erro {path}: {e}")'''
             previousProcess = self.__previousProcesses.findProcess(int(pid))
             if previousProcess is not None:
+                process.setPreviousProcess(previousProcess)
                 process.setCpuUsage(getCpuUsage(previousProcess, process))
     def updateProcessesByStatus(self) -> None:
         if not self.__previousProcesses.empty():
-          self.history.addProcessList(self.__previousProcesses)
+          self.__history.addProcessList(self.__previousProcesses)
         self.__previousProcesses = self.__currentProcesses
         self.__currentProcesses = ProcessList()
         pids: list = []
@@ -184,30 +188,58 @@ class Model:
                         process.setWaitChannel(str(file.readline()).split())
                 except Exception as e:
                     print(f"Erro: {e}")
-    def updateProcessesOtherInfo(self) -> None:
-        pass
     def update(self):
         self.updateHardwareStats()
         self.updateProcessesByStats()
     def getInfoProcesses(self) -> list:
         return self.__currentProcesses.getInfo()
+    def getHistoryCpuUsage(self, pid: int) -> list:
+        return self.__history.getInfoCpuUsage(pid)
+    def getHistoryRSS(self, pid: int) -> list:
+        return self.__history.getInfoMemoryUsage()
 # end of the class Model
 
 # Test of class or unit test
 if __name__=="__main__":
     model: Model = Model()
-    time.sleep(1)
-    start_time = time.time()
-    model.update()
-    end_time = time.time()
-    info_processes = model.getInfoProcesses()
-    cpu_usage_total: float = 0.0
-    for p in info_processes:
-        info = p.getInfo()
-        cpu_usage_total += info[5]
-        print(f"{info[0]:^8} {info[1]:^39} {info[2]:^12} {info[3]:^8} {info[4]:^8}  {info[5]*100:^4.1f}%")
-        print("")
-    print(f"Elapsed Time for update: {(end_time - start_time)*1000:.1f}ms")
-    print(f"CPU usage by the sum of each process: {cpu_usage_total*100: .2f}%")
-    print(f"CPU usage Total: {model.getCpuUsageCurrent()}")
-    print(f"Memory usage: {model.getMemoryUsageCurrent()}")
+    plt.ion()
+    while True:
+        time.sleep(5)
+        start_time = time.time()
+        model.update()
+        end_time = time.time()
+        info_processes = model.getInfoProcesses()
+        cpu_usage_total: float = 0.0
+        max: float = 0.0
+        pp: int = 0
+        name = ""
+        for p in info_processes:
+            info = p.getInfo()
+            cpu_usage_total += info[5]
+            if max < info[5]:
+                max = info[5]
+                pp = info[0]
+                name = info[1]
+            print(f"{info[0]:^8} {info[1]:^39} {info[2]:^12} {info[3]:^8} {info[4]:^8}  {info[5]*100:^4.1f}%")
+            print("")
+        s = time.time()
+        cpu_usage_history = model.getHistoryCpuUsage(pp)
+        e = time.time()
+        print(f"Get Data from History: {(e-s)*1000:.2f}ms")
+        print(f"Elapsed Time for update: {(end_time - start_time)*1000:.1f}ms")
+        print(f"CPU usage by the sum of each process: {cpu_usage_total*100: .2f}%")
+        print(f"CPU usage Total: {model.getCpuUsageCurrent()}")
+        print(f"Memory usage: {model.getMemoryUsageCurrent()}")
+        if len(cpu_usage_history) > 0:
+            # Converter os timestamps para objetos datetime
+            dates = [datetime.fromtimestamp(ts) for ts in cpu_usage_history[0]]
+            plt.clf()
+            plt.plot(dates, cpu_usage_history[1])
+            plt.grid(True, color='gray', linestyle='--', linewidth=0.5)
+            plt.title(name)
+            plt.xlabel("time")
+            plt.ylabel("CPU USAGE %")
+            plt.gca().yaxis.set_major_formatter(PercentFormatter(xmax=1))
+            plt.draw()
+            plt.show()
+            plt.pause(3)

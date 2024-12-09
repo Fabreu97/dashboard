@@ -3,6 +3,7 @@
 # Date: 11/23/2024
 ###################################################################################################
 # IMPORT
+from __future__ import annotations
 import time
 ###################################################################################################
 # MACROS:
@@ -51,6 +52,7 @@ class Process:
         self.__execution_time = execution_time
         self.__creation_time = time.time()
         self.__cpu_usage: float = 0.0
+        self.__previous_process: Process = None
     def getPID(self) -> int:
         return self.__PID
     def getCommand(self) -> str:
@@ -89,6 +91,10 @@ class Process:
         self.__cpu_usage = cpu_usage
     def getCpuUsage(self) -> float:
         return self.__cpu_usage
+    def setPreviousProcess(self, process: Process) -> None:
+        self.__previous_process = process
+    def getPreviousProcess(self) -> Process:
+        return self.__previous_process
 # end of the class Process
 
 def convertToLargestUnit(cmc: str, value: int) -> str:

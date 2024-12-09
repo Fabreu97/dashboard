@@ -106,7 +106,7 @@ class HardwareStats:
                     data: list = line.strip().split()
                     stats: dict = {}
                     total_time: float = 0.0
-                    idle_time: float = self.__jiffy * (int(data[4]) + int(data[5]))
+                    idle_time: float = self.__jiffy * (int(data[4]) + int(data[5]) + int(data[6]) + int(data[7]))
                     cpu_ = data[0][:3]
                     if cpu_ == "cpu":
                         stats[CPU_USAGE_STATS[0]] = i
@@ -138,7 +138,8 @@ class HardwareStats:
             cpu_usage_in_percentage: float = (time_total - it) / time_total
             if cpu_usage_in_percentage < 0.0:
                 cpu_usage_in_percentage = 0.0
-            self.__cpu_usage_total.append(cpu_usage_in_percentage)
+            time_metric: TimeMetric = TimeMetric(cpu_usage_in_percentage)
+            self.__cpu_usage_total.append(time_metric)
             self.__system_uptime = system_uptime
             self.__idle_time = idle_time
         except Exception as e:
@@ -156,10 +157,11 @@ class HardwareStats:
             if len(self.__memory_usage) == self.__limit_metric:
                 del self.__memory_usage[0]
             value = int(self.__memory_info["MemTotal"]) - value
-            self.__memory_usage.append(value)
+            time_metric: TimeMetric = TimeMetric(value)
+            self.__memory_usage.append(time_metric)
         except Exception as e:
             print(f"ERROR updateStats of Hardware Stats in the path {path}: {e}")
-        
+    
         # update CPU per processor
         path = "/proc/stat"
         try:
@@ -177,7 +179,8 @@ class HardwareStats:
                         cpu_usage_per_processor = ((total_time - self.__total_time_per_processor[i]) - (idle_time - self.__idle_time_per_processor[i])) / (total_time - self.__total_time_per_processor[i])
                         if len(self.__cpu_usage_per_processor[i]) == self.__limit_metric:
                             del self.__cpu_usage_per_processor[i][0]
-                        self.__cpu_usage_per_processor[i].append(cpu_usage_per_processor)
+                        time_metric: TimeMetric = TimeMetric(cpu_usage_per_processor)
+                        self.__cpu_usage_per_processor[i].append(time_metric)
                         self.__total_time_per_processor[i] = total_time
                         self.__idle_time_per_processor[i] = idle_time
                     else:
@@ -191,11 +194,19 @@ class HardwareStats:
         return self.__processors_info
     def getCpuUsageCurrent(self) -> str:
         # return f"{self.__cpu_usage_total[-1]*100:.2f}%"
-        return f"{self.__cpu_usage_per_processor[0][-1]*100:.2f}%"
+        return f"{self.__cpu_usage_total[-1].getMetric()*100:.2f}%"
     def getMemoryUsageCurrent(self) -> str:
-        return f"{convertToLargestUnit('KB',self.__memory_usage[-1])}"
+        return f"{convertToLargestUnit('KB',self.__memory_usage[-1].getMetric())}"
     def getCpuUsage(self) -> list:
-        return self.__cpu_usage_total
+        ans: list = []
+        time: list = []
+        metric: list = []
+        for i in self.__cpu_usage_total:
+            time.append(i.getTime())
+            metric.append(i.getMetric())
+        ans.append(time)
+        ans.append(metric)
+        return ans
     def getMemoryUsage(self) -> list:
         return self.__memory_usage
     def setLimitMetric(self, limit: int) -> None:
@@ -207,7 +218,7 @@ class HardwareStats:
     def getCpuUsagePerProcessorCurrent(self) -> list:
         ans: list = []
         for i in range(1,len(self.__cpu_usage_per_processor)):
-            ans.append(self.__cpu_usage_per_processor[i][-1])
+            ans.append(self.__cpu_usage_per_processor[i][-1].getMetric())
         return ans 
     def getCpuUsagePerProcessor(self) -> list:
         return self.__cpu_usage_per_processor
@@ -233,10 +244,9 @@ if __name__=='__main__':
         e = time.time()
         cpu_usage = stats.getCpuUsage()
         cpu_usage_per_processor: list = stats.getCpuUsagePerProcessor()
-        x = range(0,len(cpu_usage))
         #cpu_usage = [i * 100 for i in cpu_usage]
         plt.clf()
-        plt.plot(x, cpu_usage)
+        plt.plot(cpu_usage[0], cpu_usage[1])
         plt.grid(True, color='gray', linestyle='--', linewidth=0.5)
         plt.title("CPU Usage in %")
         plt.xlabel("time")

@@ -6,10 +6,10 @@
 import time
 ###################################################################################################
 # MACROS
-
+# COOD
 ###################################################################################################
 class TimeMetric:
-    def __init__(self, metric: float, time: float = time.time()) -> None:
+    def __init__(self, metric: float | int, time: float = time.time()) -> None:
         self.__metric: float = metric
         self.__time: float = time
     def setMetric(self, metric: float) -> None:
@@ -21,5 +21,5 @@ class TimeMetric:
     def getTime(self) -> float:
         return self.__time
     def getInfo(self) -> list:
-        return [self.__metric, self.__time]
+        return [self.__time, self.__metric]
 # end of the class TimeMetric
