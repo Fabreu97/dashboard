@@ -128,5 +128,4 @@ if __name__ == "__main__":
     t1.daemon = True
     t1.start()
     view.run()
-    t1.join()
     print("Finalizou")

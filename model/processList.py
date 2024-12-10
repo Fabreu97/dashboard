@@ -16,6 +16,8 @@ class ProcessList:
         self.__I: int = 0 # Idle
         self.__U: int = 0 # Unknown
         self.__total_threads: int = 0
+    def length(self) -> int:
+        return len(self.processes)
     def empty(self) -> bool:
         return self.processes == []
     def getInfo(self) -> list:

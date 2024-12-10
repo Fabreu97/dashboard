@@ -6,7 +6,9 @@
 import sys
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget
 from PyQt6.QtGui import QColor, QPalette
-from .header import Header
+from header import Header
+from screen import Screen
+from general import GeneralScreen
 ###################################################################################################
 # MACROS
 TITLE: str = "Dashboard - Gerenciador de Tarefas"
@@ -25,13 +27,7 @@ class View(QMainWindow):
 
         __header: Header = None
 
-        __general_screen = None
-
-        __processor_details_screen = None
-
-        __memory_details_screen = None
-
-        __process_detail_screen = None
+        __screen: Screen = None
 
         __select_header_button: int = None
 
@@ -57,6 +53,10 @@ class View(QMainWindow):
         self.__app.setPalette(self.__palette)
 
         self.__header = Header(self.__window)
+        self.__screen = GeneralScreen(self.__window)
+
+    def update(self, data):
+        self.__screen.update(data)
     def run(self):
         self.__window.show()
         sys.exit(self.__app.exec())

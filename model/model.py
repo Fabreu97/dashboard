@@ -197,6 +197,10 @@ class Model:
         return self.__history.getInfoCpuUsage(pid)
     def getHistoryRSS(self, pid: int) -> list:
         return self.__history.getInfoMemoryUsage()
+    def getDataGeneralScreen(self) -> list:
+        data: list = []
+        data.append(self.__currentProcesses.length()) # 0
+        data.append
 # end of the class Model
 
 # Test of class or unit test
