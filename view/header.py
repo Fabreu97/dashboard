@@ -1,4 +1,4 @@
-# Dashboard window header
+# Dashboard Window Header
 # Authors: Fernando Abreu e Augusto Rosa
 # Date: 12/09/2024
 ###################################################################################################

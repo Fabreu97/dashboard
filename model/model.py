@@ -8,10 +8,10 @@ from matplotlib.ticker import PercentFormatter
 from datetime import datetime
 import os
 import time
-from process import Process, getCpuUsage
-from processList import ProcessList
-from processHistory import ProcessHistory
-from hardwareStats import HardwareStats, STANDARD_TIME_JIFFY
+from .process import Process, getCpuUsage
+from .processList import ProcessList
+from .processHistory import ProcessHistory
+from .hardwareStats import HardwareStats, STANDARD_TIME_JIFFY
 ###################################################################################################
 # MACROS : podem virar constante de classe com uso da @property
 ## MACROS para o arquivo /proc/[PID]/stat

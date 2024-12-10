@@ -5,8 +5,8 @@
 # IMPORT
 import os
 import time
-from TimeMetric import TimeMetric
-from process import convertToLargestUnit
+from .TimeMetric import TimeMetric
+from .process import convertToLargestUnit
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import PercentFormatter
@@ -237,7 +237,8 @@ if __name__=='__main__':
     while(True):
         start = time.time()
         end = start
-        time.sleep(1.0)
+        while((end - start) < 1.0):
+            end = time.time()
         s = time.time()
         stats.updateStats()
         e = time.time()

@@ -6,7 +6,7 @@
 import sys
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget
 from PyQt6.QtGui import QColor, QPalette
-from header import Header
+from .header import Header
 ###################################################################################################
 # MACROS
 TITLE: str = "Dashboard - Gerenciador de Tarefas"

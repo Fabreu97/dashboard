@@ -10,4 +10,4 @@ install:
 uninstall:
 	$(PIP) uninstall -r $(REQUIREMENTS)
 clean:
-	rm -rf __pycache__ model/__pycache__
+	rm -rf __pycache__ model/__pycache__ view/__pycache__

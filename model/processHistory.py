@@ -3,8 +3,8 @@
 # Date: 12/07/2024
 ###################################################################################################
 # IMPORT
-from process import Process
-from processList import ProcessList
+from .process import Process
+from .processList import ProcessList
 ###################################################################################################
 # MACROS
 SIZE_LIMIT: int = 60

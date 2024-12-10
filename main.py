@@ -1,10 +1,12 @@
-from model import getInfoProcesses, getInfoMem, convertUnidade, MEM_INFO, getInfoProcessor
+from model_test import getInfoProcesses, getInfoMem, convertUnidade, MEM_INFO, getInfoProcessor
 import sys
 import time
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QPushButton, QLabel
 from PyQt6.QtGui import QColor, QPalette
 from PyQt6.QtCore import Qt
-
+import threading
+from view.view import View
+from model.model import Model
 N_CAMPOS_PROCESSO: int = 8 
 
 def main():
@@ -103,6 +105,28 @@ def main():
     # Iniciar o loop da aplicação
     sys.exit(app.exec())
 
+lock = threading.Lock()
+model = Model()
+def update_model():
+    model.update()
+    print(f"Thread {threading.current_thread().name} está sendo executada a cada 5s")
+
+def thread_secundaria():
+    t2 = threading.Thread(target=update_model, name="update")
+    s = time.time()
+    while(True):
+        e = time.time()
+        if(e-s > 5.0):
+            t2 = threading.Thread(target=update_model, name="update")
+            t2.start()
+            t2.join()
+            s = time.time()
 # Executar a função principal
 if __name__ == "__main__":
-    main()
+    view = View()
+    t1 = threading.Thread(target=thread_secundaria, name="thread_secundaria")
+    t1.daemon = True
+    t1.start()
+    view.run()
+    t1.join()
+    print("Finalizou")
