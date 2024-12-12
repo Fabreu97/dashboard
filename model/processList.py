@@ -21,7 +21,11 @@ class ProcessList:
     def empty(self) -> bool:
         return self.processes == []
     def getInfo(self) -> list:
-        return self.processes
+        data: list = []
+        process: Process
+        for process in self.processes:
+            data.append(process.getInfo())
+        return data
     def addProcess(self, process: Process) -> None:
         character = process.getState()[0]
         if character == "E":

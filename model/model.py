@@ -3,7 +3,7 @@
 # Date: 12/07/2024
 ###################################################################################################
 # IMPORT
-from ..controller.controller import Controller
+# from controller.controller import Controller, buffer_general_screen_data
 import matplotlib.pyplot as plt
 from matplotlib.ticker import PercentFormatter
 from datetime import datetime
@@ -13,6 +13,7 @@ from .process import Process, getCpuUsage
 from .processList import ProcessList
 from .processHistory import ProcessHistory
 from .hardwareStats import HardwareStats, STANDARD_TIME_JIFFY
+import queue
 ###################################################################################################
 # MACROS : podem virar constante de classe com uso da @property
 ## MACROS para o arquivo /proc/[PID]/stat
@@ -61,19 +62,22 @@ DIRTY_PAGES: int = 6
 PAGE_SIZE_KB: int = 4
 READ: str = "r"
 ###################################################################################################
+# VARIABLE GLOBAL
+
+###################################################################################################
 # INFORMATION
 ###################################################################################################
 
 class Model:
 
-    __controller: Controller = None
+    #__controller: Controller = None
 
     def __init__(self):
         self.__previousProcesses = ProcessList()
         self.__currentProcesses = ProcessList()
         self.__history = ProcessHistory()
         self.__hardware_stats = HardwareStats()
-        self.__controller: Controller = None
+        #self.__controller: Controller = None
 
         pids = []
         path = "/proc"
@@ -203,13 +207,17 @@ class Model:
         return self.__history.getInfoCpuUsage(pid)
     def getHistoryRSS(self, pid: int) -> list:
         return self.__history.getInfoMemoryUsage()
-    def getDataGeneralScreen(self) -> list:
+    def dataRequestFromTheGeneralScreen(self) -> None:
+        # monta os dados no formato que tela Geral possa consumir
         data: list = []
         data.append(self.__currentProcesses.length()) # 0
-        return data
+        # enviar os dados pro buffer
+        buffer_general_screen_data.put(data)
+''' 
     def connect(self, controller: Controller):
         self.__controller = controller
 # end of the class Model
+'''
 
 # Test of class or unit test
 if __name__=="__main__":

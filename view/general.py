@@ -15,8 +15,7 @@ SIZE_TABLE_X: int = 900
 SIZE_TABLE_Y: int = 300
 ## DATA
 SIZE_OF_THE_PROCESS_LIST: int = 0
-PROCESS_INFORMATION_FIELDS: int = 1
-PROCESS_LIST: int = 2
+PROCESS_LIST: int = 1
 ###################################################################################################
 
 class GeneralScreen(Screen):
@@ -38,15 +37,22 @@ class GeneralScreen(Screen):
         self.__table.setColumnWidth(3,50)
         self.__table.setColumnWidth(4,200)
         self.__table.setColumnWidth(5,200)
-        self.__table.setItem(0,0, QTableWidgetItem(str("Test")))
         if data is not None:
             self.__table.setRowCount(data[SIZE_OF_THE_PROCESS_LIST])  # Número de linhas
-            self.__table.setColumnCount(data[PROCESS_INFORMATION_FIELDS])  # Número de colunas
+            for i, process in enumerate(data[PROCESS_LIST]):
+                for j, info in enumerate(process):
+                    self.__table.setItem(i,j, QTableWidgetItem(str(info)))
+
         #self.__table.resizeColumnsToContents()
         self.__table_layout.addWidget(self.__table)
         self.__main_layout.addLayout(self.__header_layout)
         self.__main_layout.addLayout(self.__table_layout)
         self.__window.setLayout(self.__main_layout)
     def update(self, data):
+        if data is not None:
+            self.__table.setRowCount(data[SIZE_OF_THE_PROCESS_LIST])  # Número de linhas
+            for i, process in enumerate(data[PROCESS_LIST]):
+                for j, info in enumerate(process):
+                    self.__table.setItem(i,j, QTableWidgetItem(str(info)))
         print("Update General Screen")
 # end of the class General Screen

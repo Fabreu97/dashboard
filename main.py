@@ -7,6 +7,8 @@ from PyQt6.QtCore import Qt
 import threading
 from view.view import View
 from model.model import Model
+from controller.controller import Controller
+
 N_CAMPOS_PROCESSO: int = 8 
 
 def main():
@@ -104,7 +106,7 @@ def main():
 
     # Iniciar o loop da aplicação
     sys.exit(app.exec())
-
+'''
 lock = threading.Lock()
 model = Model()
 def update_model():
@@ -121,11 +123,33 @@ def thread_secundaria():
             t2.start()
             t2.join()
             s = time.time()
-# Executar a função principal
+'''
+
 if __name__ == "__main__":
+
+    # Criando as instancias da aplicação
     view = View()
-    t1 = threading.Thread(target=thread_secundaria, name="thread_secundaria")
-    t1.daemon = True
-    t1.start()
+    model = Model()
+    controller = Controller()
+
+    # Fazendo configurações iniciais...
+    view.connect(controller=controller)
+    model.connect(controller=controller)
+    controller(view=view, model=model)
+
+    # Executando
+    '''
+        Executando a Thread de atualização dos dados do Model em cada 5s
+    '''
+
+    controller.updateDataFromModel() 
+
+
+    '''
+        Executando, de forma automatizada pela biblioteca PyQt6, a aplicação.
+        P.S.: O loop de execução do programa esta sendo executado nos bastidores pela encapsulamento e automatização do PyQt6
+    '''
+
     view.run()
-    print("Finalizou")
+
+    # The End

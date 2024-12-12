@@ -3,8 +3,9 @@
 # Date: 12/09/2024
 ###################################################################################################
 # IMPORT
+###################################################################################################
 import sys
-from ..controller.controller import Controller
+from controller.controller import Controller, buffer_general_screen_data
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget
 from PyQt6.QtGui import QColor, QPalette
 from header import Header
@@ -12,6 +13,7 @@ from screen import Screen
 from general import GeneralScreen
 ###################################################################################################
 # MACROS
+###################################################################################################
 TITLE: str = "Dashboard - Gerenciador de Tarefas"
 WINDOW_SIZE_X: int = 1200
 WINDOW_SIZE_Y: int = 700
@@ -64,24 +66,32 @@ class View(QMainWindow):
         self.__app.setPalette(self.__palette)
 
         self.__header = Header(self.__window)
+        self.__header.eventClickGeneralButton(self.headerGeneralButtonClickEvent)
         self.__screen = GeneralScreen(self.__window)
 
         self.__header_buttons_click_event: int = NOT_EVENT
 
         self.__controller: Controller = None
 
+        self.__controller.dataRequestFromTheGeneralScreen()
+
     def connect(self, controller: Controller):
         self.__controller = controller
 
-    def update(self, data):
+    def update(self):
+        data = buffer_general_screen_data.get()
         self.__screen.update(data)
     def run(self):
         self.__window.show()
         sys.exit(self.__app.exec())
+
     ''' Click Event Function for Header Buttons. '''
     
     def headerGeneralButtonClickEvent(self):
         self.__header_buttons_click_event = HEADER_GENERAL_BUTTON_CLICK_EVENT
+        del self.__screen
+        self.__screen = GeneralScreen(self.__window)
+        self.update()
         print("General")
     def headerProcessorButtonClickEvent(self):
         self.__header_buttons_click_event = HEADER_PROCESSOR_BUTTON_CLICK_EVENT
