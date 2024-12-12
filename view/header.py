@@ -56,3 +56,13 @@ class Header:
         self.__process_details_screen_button = QPushButton(PROCESS_BUTTON_NAME, window)
         self.__process_details_screen_button.setGeometry(pos_x, pos_y, BUTTON_SIZE_X, BUTTON_SIZE_Y) # POS, SIZE
         self.__process_details_screen_button.show()
+
+    def eventClickGeneralButton(self, func) -> None:
+        self.__generalButton.clicked.connect(func)
+    def eventClickProcessorButton(self, func) -> None:
+        self.__processor_details_screen_button.clicked.connect(func)
+    def eventClickMemoryButton(self, func) -> None:
+        self.__memory_details_screen_button.clicked.connect(func)
+    def eventClickProcessButton(self, func) -> None:
+        self.__process_details_screen_button.clicked.connect(func)
+    

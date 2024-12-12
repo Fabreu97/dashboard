@@ -3,6 +3,7 @@
 # Date: 12/07/2024
 ###################################################################################################
 # IMPORT
+from ..controller.controller import Controller
 import matplotlib.pyplot as plt
 from matplotlib.ticker import PercentFormatter
 from datetime import datetime
@@ -64,11 +65,16 @@ READ: str = "r"
 ###################################################################################################
 
 class Model:
+
+    __controller: Controller = None
+
     def __init__(self):
         self.__previousProcesses = ProcessList()
         self.__currentProcesses = ProcessList()
         self.__history = ProcessHistory()
         self.__hardware_stats = HardwareStats()
+        self.__controller: Controller = None
+
         pids = []
         path = "/proc"
         if os.path.exists(path):
@@ -200,7 +206,9 @@ class Model:
     def getDataGeneralScreen(self) -> list:
         data: list = []
         data.append(self.__currentProcesses.length()) # 0
-        data.append
+        return data
+    def connect(self, controller: Controller):
+        self.__controller = controller
 # end of the class Model
 
 # Test of class or unit test

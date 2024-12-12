@@ -4,6 +4,7 @@
 ###################################################################################################
 # IMPORT
 import sys
+from ..controller.controller import Controller
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget
 from PyQt6.QtGui import QColor, QPalette
 from header import Header
@@ -14,22 +15,32 @@ from general import GeneralScreen
 TITLE: str = "Dashboard - Gerenciador de Tarefas"
 WINDOW_SIZE_X: int = 1200
 WINDOW_SIZE_Y: int = 700
+
+NOT_EVENT: int = 0
+HEADER_GENERAL_BUTTON_CLICK_EVENT: int = 1
+HEADER_PROCESSOR_BUTTON_CLICK_EVENT: int = 2
+HEADER_MEMORY_BUTTON_CLICK_EVENT: int = 3
+HEADER_PROCESS_BUTTON_CLICK_EVENT: int = 4
 ###################################################################################################
 
 class View(QMainWindow):
+    __app: QApplication = None
+
+    __window: QWidget = None 
+
+    __palette: QPalette = None
+
+    __header: Header = None
+
+    __screen: Screen = None
+
+    __select_header_button: int = None
+
+    __header_buttons_click_event: int = NOT_EVENT
+
+    __controller : Controller = None
+
     def __init__(self):
-        
-        __app: QApplication = None
-
-        __window: QWidget = None 
-
-        __palette: QPalette = None
-
-        __header: Header = None
-
-        __screen: Screen = None
-
-        __select_header_button: int = None
 
         super().__init__
         self.__app = QApplication(sys.argv)
@@ -55,11 +66,29 @@ class View(QMainWindow):
         self.__header = Header(self.__window)
         self.__screen = GeneralScreen(self.__window)
 
+        self.__header_buttons_click_event: int = NOT_EVENT
+
+        self.__controller: Controller = None
+
+    def connect(self, controller: Controller):
+        self.__controller = controller
+
     def update(self, data):
         self.__screen.update(data)
     def run(self):
         self.__window.show()
         sys.exit(self.__app.exec())
+    ''' Click Event Function for Header Buttons. '''
+    
+    def headerGeneralButtonClickEvent(self):
+        self.__header_buttons_click_event = HEADER_GENERAL_BUTTON_CLICK_EVENT
+        print("General")
+    def headerProcessorButtonClickEvent(self):
+        self.__header_buttons_click_event = HEADER_PROCESSOR_BUTTON_CLICK_EVENT
+        print("Processor")
+    def headerMemoryButtonClickEvent(self):
+        self.__header_buttons_click_event = HEADER_MEMORY_BUTTON_CLICK_EVENT
+        print("Memory")
 # end of the class View
 
 if __name__=='__main__':
