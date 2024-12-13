@@ -4,14 +4,17 @@ from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTableWidget, QT
 from PyQt6.QtGui import QColor, QPalette
 from PyQt6.QtCore import Qt
 import threading
-from view.view import View
-from model.model import Model
-from controller.controller import Controller
+
+
+from view import View
+from model import Model
+from controller import Controller
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
-    # Criando as instancias da aplicação
+    # Criando as instancias da aplicação do padrão MVC(Model-View-Controller)
     view = View(app)
     model = Model()
     controller = Controller()
@@ -35,7 +38,7 @@ if __name__ == "__main__":
 
     '''
         Executando, de forma automatizada pela biblioteca PyQt6, a aplicação.
-        P.S.: O loop de execução do programa esta sendo executado nos bastidores pela encapsulamento e automatização do PyQt6
+        P.S.: O loop de execução do programa esta sendo executado nos bastidores pelo encapsulamento e automatização do PyQt6
     '''
 
     view.run()

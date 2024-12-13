@@ -8,6 +8,10 @@ import queue
 import threading
 import time
 from model.model import Model
+HEADER_GENERAL_BUTTON_CLICK_EVENT: int = 1
+HEADER_PROCESSOR_BUTTON_CLICK_EVENT: int = 2
+HEADER_MEMORY_BUTTON_CLICK_EVENT: int = 3
+HEADER_PROCESS_BUTTON_CLICK_EVENT: int = 4
 ###################################################################################################
 # MACROS
 QUEUE_MAX_SIZE: int = 10
@@ -35,10 +39,14 @@ class Controller:
         while(True):
             e = time.time()
             if(e-s > UPDATE_TIME):
+                self.__lock.acquire()
                 self.__model.update()
+                self.__lock.release()
                 s = time.time()
                 print("Atualizando os dados do Model")
                 
+
+
 
     def updateDataFromModel(self) -> None:
         thread = threading.Thread(target=self.__update, name='update')

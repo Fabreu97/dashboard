@@ -49,5 +49,5 @@ class GeneralScreen(Screen):
             for i, process in enumerate(data[PROCESS_LIST]):
                 for j, info in enumerate(process):
                     self.__table.setItem(i,j, QTableWidgetItem(str(info)))
-        print("Update General Screen")
+        self.__window.show()
 # end of the class General Screen

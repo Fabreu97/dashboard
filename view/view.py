@@ -79,6 +79,9 @@ class View(QMainWindow):
 
         self.__data = None
 
+        self.__dataGeneral = None
+
+        '''
         self.__timer_data = QTimer()
         self.__timer_data.timeout.connect(self.updateData)
         self.__timer_data.setInterval(4000)
@@ -88,7 +91,7 @@ class View(QMainWindow):
         self.__timer.timeout.connect(lambda: self.__screen.update(self.__data))
         self.__timer.setInterval(4000)
         self.__timer.start()
-
+        '''
     def updateData(self):
         if self.__controller is not None:
             self.__data = self.__controller.dataRequestFromTheGeneralScreen2()
@@ -140,6 +143,8 @@ class View(QMainWindow):
     def headerMemoryButtonClickEvent(self):
         self.__header_buttons_click_event = HEADER_MEMORY_BUTTON_CLICK_EVENT
         print("Memory")
+    def updateDataFromModel(self):
+        self.__controller.updateDataFromModel()
 # end of the class View
 
 if __name__=='__main__':
