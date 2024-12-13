@@ -59,7 +59,6 @@ class Controller:
     def dataRequestFromTheGeneralScreen(self) -> None:
         request_thread = threading.Thread(target=self.__model.dataRequestFromTheGeneralScreen, name="Data Request Model")
         request_thread.start()
-        request_thread.join()
     
     def dataRequestFromTheGeneralScreen2(self):
         return self.__model.dataRequestFromTheGeneralScreen2()

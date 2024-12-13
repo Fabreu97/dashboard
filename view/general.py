@@ -43,6 +43,7 @@ class GeneralScreen(Screen):
         self.__layout.addWidget(self.__table)
         #self.__table.resizeColumnsToContents()
         self.__window.setLayout(self.__layout)
+    
     def update(self, data):
         if data is not None:
             self.__table.setRowCount(data[SIZE_OF_THE_PROCESS_LIST])  # Número de linhas
