@@ -8,6 +8,7 @@ import sys
 import threading
 from controller.controller import Controller, buffer_general_screen_data
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget
+from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QColor, QPalette
 from view.header import Header
 from view.screen import Screen
@@ -45,10 +46,11 @@ class View(QMainWindow):
 
     __data: list = None
 
-    def __init__(self):
-        super().__init__
-        self.__app = QApplication(sys.argv)
+    __timer: QTimer = None
 
+    def __init__(self, app: QApplication):
+        super().__init__()
+        self.__app = app
         self.__window = QWidget()
         self.__window.setWindowTitle(TITLE)
         self.__window.setFixedSize(WINDOW_SIZE_X, WINDOW_SIZE_Y)
@@ -77,6 +79,21 @@ class View(QMainWindow):
 
         self.__data = None
 
+        self.__timer_data = QTimer()
+        self.__timer_data.timeout.connect(self.updateData)
+        self.__timer_data.setInterval(4000)
+        self.__timer_data.start()
+
+        self.__timer: QTimer = QTimer()
+        self.__timer.timeout.connect(lambda: self.__screen.update(self.__data))
+        self.__timer.setInterval(4000)
+        self.__timer.start()
+
+    def updateData(self):
+        if self.__controller is not None:
+            self.__data = self.__controller.dataRequestFromTheGeneralScreen2()
+
+
     def connect(self, controller: Controller):
         self.__controller = controller
         consumer_thread = threading.Thread(target=self.consumerDataGeneralScreen)
@@ -87,7 +104,7 @@ class View(QMainWindow):
 
     def consumerDataGeneralScreen(self) -> None:
         self.__data = buffer_general_screen_data.get()
-        print(self.__data[1])
+        print(self.__data[0])
         print("View consumindo os dados...")
 
     def run(self):
@@ -102,6 +119,7 @@ class View(QMainWindow):
 
     def headerGeneralButtonClickEvent(self):
         print("Botão Geral Apertado")
+        self.__app.processEvents()
         if self.__header_buttons_click_event != HEADER_GENERAL_BUTTON_CLICK_EVENT:
             self.__header_buttons_click_event = HEADER_GENERAL_BUTTON_CLICK_EVENT
             del self.__screen
@@ -109,9 +127,13 @@ class View(QMainWindow):
         consumer_thread = threading.Thread(target=self.consumerDataGeneralScreen)
         consumer_thread.start() # O consumidor espera o dado do buffer
         self.__controller.dataRequestFromTheGeneralScreen() # faz a requisição de dados e criar a thread de Produtor
-        consumer_thread.join() # libera o quando as duas threads tiverem sido terminadas
-        self.__screen.update(self.__data)
+        #consumer_thread.join() # libera o quando as duas threads tiverem sido terminadas
         print("Botão Geral Apertado")
+    def headerGeneralButtonClickEvent2(self):
+        self.__screen.update(self.__controller.dataRequestFromTheGeneralScreen2())
+
+
+    
     def headerProcessorButtonClickEvent(self):
         self.__header_buttons_click_event = HEADER_PROCESSOR_BUTTON_CLICK_EVENT
         print("Processor")

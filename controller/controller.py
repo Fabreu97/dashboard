@@ -35,11 +35,10 @@ class Controller:
         while(True):
             e = time.time()
             if(e-s > UPDATE_TIME):
-                self.__lock.acquire()
                 self.__model.update()
-                self.__lock.release()
                 s = time.time()
                 print("Atualizando os dados do Model")
+                
 
     def updateDataFromModel(self) -> None:
         thread = threading.Thread(target=self.__update, name='update')
@@ -49,9 +48,12 @@ class Controller:
         Métodos de Requisições de dados do view e recebendo a resposta do Model.
     '''
 
-    def dataRequestFromTheGeneralScreen(self):
+    def dataRequestFromTheGeneralScreen(self) -> None:
         request_thread = threading.Thread(target=self.__model.dataRequestFromTheGeneralScreen, name="Data Request Model")
         request_thread.start()
         request_thread.join()
+    
+    def dataRequestFromTheGeneralScreen2(self):
+        return self.__model.dataRequestFromTheGeneralScreen2()
     
 # end of the Controller class
