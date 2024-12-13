@@ -125,6 +125,7 @@ def thread_secundaria():
             s = time.time()
 '''
 
+
 if __name__ == "__main__":
 
     # Criando as instancias da aplicação
@@ -133,9 +134,13 @@ if __name__ == "__main__":
     controller = Controller()
 
     # Fazendo configurações iniciais...
+    # P.S.: A ordem importa das conexões.
+    controller.connect(model=model)
     view.connect(controller=controller)
-    model.connect(controller=controller)
-    controller(view=view, model=model)
+
+    def eventclickGeneralButton():
+        view.headerGeneralButtonClickEvent()
+    view.addEventClickGeneralButton(eventclickGeneralButton)
 
     # Executando
     '''

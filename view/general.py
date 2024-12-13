@@ -3,8 +3,8 @@
 # Date: 12/10/2024
 ###################################################################################################
 # IMPORT
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem
-from screen import Screen
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QApplication
+from view.screen import Screen
 ###################################################################################################
 # MACROS
 ## TABLE
@@ -19,14 +19,12 @@ PROCESS_LIST: int = 1
 ###################################################################################################
 
 class GeneralScreen(Screen):
-    def __init__(self, window: QWidget, data = None):
+    def __init__(self, app: QApplication, window: QWidget, data = None):
         super().__init__()
+        self.__app = app
         self.__window = window
-        self.__main_layout = QVBoxLayout()
-        self.__main_layout.setContentsMargins(20, 30, 20, 10)
-        self.__header_layout = QVBoxLayout()
-        self.__header_layout.setContentsMargins(20, POSITION_TABLE_Y + 30, 20, 10)
-        self.__table_layout = QVBoxLayout()
+        self.__layout = QVBoxLayout()
+        self.__layout.setContentsMargins(20, POSITION_TABLE_Y + 30, 20, 10)
         self.__table = QTableWidget()
         self.__table.setColumnCount(len(LABELS_TABLE))
         self.__table.setHorizontalHeaderLabels(LABELS_TABLE)
@@ -42,17 +40,15 @@ class GeneralScreen(Screen):
             for i, process in enumerate(data[PROCESS_LIST]):
                 for j, info in enumerate(process):
                     self.__table.setItem(i,j, QTableWidgetItem(str(info)))
-
+        self.__layout.addWidget(self.__table)
         #self.__table.resizeColumnsToContents()
-        self.__table_layout.addWidget(self.__table)
-        self.__main_layout.addLayout(self.__header_layout)
-        self.__main_layout.addLayout(self.__table_layout)
-        self.__window.setLayout(self.__main_layout)
+        self.__window.setLayout(self.__layout)
     def update(self, data):
         if data is not None:
             self.__table.setRowCount(data[SIZE_OF_THE_PROCESS_LIST])  # Número de linhas
             for i, process in enumerate(data[PROCESS_LIST]):
                 for j, info in enumerate(process):
                     self.__table.setItem(i,j, QTableWidgetItem(str(info)))
+            self.__app.processEvents()
         print("Update General Screen")
 # end of the class General Screen

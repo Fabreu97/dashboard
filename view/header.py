@@ -58,6 +58,7 @@ class Header:
         self.__process_details_screen_button.show()
 
     def eventClickGeneralButton(self, func) -> None:
+        print("Adicionando a função de eventos do Botão Geral.")
         self.__generalButton.clicked.connect(func)
     def eventClickProcessorButton(self, func) -> None:
         self.__processor_details_screen_button.clicked.connect(func)

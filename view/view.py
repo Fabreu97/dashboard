@@ -5,12 +5,13 @@
 # IMPORT
 ###################################################################################################
 import sys
+import threading
 from controller.controller import Controller, buffer_general_screen_data
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget
 from PyQt6.QtGui import QColor, QPalette
-from header import Header
-from screen import Screen
-from general import GeneralScreen
+from view.header import Header
+from view.screen import Screen
+from view.general import GeneralScreen
 ###################################################################################################
 # MACROS
 ###################################################################################################
@@ -42,8 +43,9 @@ class View(QMainWindow):
 
     __controller : Controller = None
 
-    def __init__(self):
+    __data: list = None
 
+    def __init__(self):
         super().__init__
         self.__app = QApplication(sys.argv)
 
@@ -66,33 +68,50 @@ class View(QMainWindow):
         self.__app.setPalette(self.__palette)
 
         self.__header = Header(self.__window)
-        self.__header.eventClickGeneralButton(self.headerGeneralButtonClickEvent)
-        self.__screen = GeneralScreen(self.__window)
+
+        self.__screen = GeneralScreen(self.__app, self.__window)
 
         self.__header_buttons_click_event: int = NOT_EVENT
 
         self.__controller: Controller = None
 
-        self.__controller.dataRequestFromTheGeneralScreen()
+        self.__data = None
 
     def connect(self, controller: Controller):
         self.__controller = controller
+        consumer_thread = threading.Thread(target=self.consumerDataGeneralScreen)
+        consumer_thread.start() # O consumidor espera o dado do buffer
+        self.__controller.dataRequestFromTheGeneralScreen() # faz a requisição de dados e criar a thread de Produtor
+        consumer_thread.join() # libera o quando as duas threads tiverem sido terminadas
+        self.__screen.update(self.__data)
 
-    def update(self):
-        data = buffer_general_screen_data.get()
-        self.__screen.update(data)
+    def consumerDataGeneralScreen(self) -> None:
+        self.__data = buffer_general_screen_data.get()
+        print(self.__data[1])
+        print("View consumindo os dados...")
+
     def run(self):
         self.__window.show()
         sys.exit(self.__app.exec())
 
     ''' Click Event Function for Header Buttons. '''
-    
+
+    def addEventClickGeneralButton(self, func):
+        self.__header.eventClickGeneralButton(func)
+
+
     def headerGeneralButtonClickEvent(self):
-        self.__header_buttons_click_event = HEADER_GENERAL_BUTTON_CLICK_EVENT
-        del self.__screen
-        self.__screen = GeneralScreen(self.__window)
-        self.update()
-        print("General")
+        print("Botão Geral Apertado")
+        if self.__header_buttons_click_event != HEADER_GENERAL_BUTTON_CLICK_EVENT:
+            self.__header_buttons_click_event = HEADER_GENERAL_BUTTON_CLICK_EVENT
+            del self.__screen
+            self.__screen = GeneralScreen(self.__app, self.__window)
+        consumer_thread = threading.Thread(target=self.consumerDataGeneralScreen)
+        consumer_thread.start() # O consumidor espera o dado do buffer
+        self.__controller.dataRequestFromTheGeneralScreen() # faz a requisição de dados e criar a thread de Produtor
+        consumer_thread.join() # libera o quando as duas threads tiverem sido terminadas
+        self.__screen.update(self.__data)
+        print("Botão Geral Apertado")
     def headerProcessorButtonClickEvent(self):
         self.__header_buttons_click_event = HEADER_PROCESSOR_BUTTON_CLICK_EVENT
         print("Processor")

@@ -69,15 +69,11 @@ READ: str = "r"
 ###################################################################################################
 
 class Model:
-
-    #__controller: Controller = None
-
     def __init__(self):
         self.__previousProcesses = ProcessList()
         self.__currentProcesses = ProcessList()
         self.__history = ProcessHistory()
         self.__hardware_stats = HardwareStats()
-        #self.__controller: Controller = None
 
         pids = []
         path = "/proc"
@@ -208,16 +204,19 @@ class Model:
     def getHistoryRSS(self, pid: int) -> list:
         return self.__history.getInfoMemoryUsage()
     def dataRequestFromTheGeneralScreen(self) -> None:
+        # importando o buffer
+        from controller.controller import buffer_general_screen_data
         # monta os dados no formato que tela Geral possa consumir
         data: list = []
         data.append(self.__currentProcesses.length()) # 0
-        # enviar os dados pro buffer
-        buffer_general_screen_data.put(data)
+        data.append(self.__currentProcesses.getInfo()) # 1
+        buffer_general_screen_data.put(data) # enviar
+        print("Model está enviando os dados da Tela Geral...")
 ''' 
     def connect(self, controller: Controller):
         self.__controller = controller
-# end of the class Model
 '''
+# end of the class Model
 
 # Test of class or unit test
 if __name__=="__main__":
