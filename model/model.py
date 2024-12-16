@@ -9,7 +9,7 @@ from matplotlib.ticker import PercentFormatter
 from datetime import datetime
 import os
 import time
-from .process import Process, getCpuUsage
+from .process import Process, getCpuUsage, convertToLargestUnit
 from .processList import ProcessList
 from .processHistory import ProcessHistory
 from .hardwareStats import HardwareStats, STANDARD_TIME_JIFFY
@@ -226,6 +226,10 @@ class Model:
             data: list = []
             data.append(self.__currentProcesses.length()) # 0
             data.append(self.__currentProcesses.getInfo()) # 1
+            data.append(self.__hardware_stats.getCpuUsageCurrent()) # 2
+            data.append(self.__hardware_stats.getMemoryUsageCurrent()) # 3
+            data.append(convertToLargestUnit('KB', int(self.__hardware_stats.getMemoryInfo()['MemTotal']))) # 4
+            data.append(self.__currentProcesses.getTotalThreads()) # 5
             buffer_general_screen_data.put(data) # enviar
             print("Model está enviando os dados da Tela Geral...")
             self.dataReadToSend.clear()
@@ -236,6 +240,9 @@ class Model:
         data: list = []
         data.append(self.__currentProcesses.length()) # 0
         data.append(self.__currentProcesses.getInfo()) # 1
+        data.append(self.__hardware_stats.getCpuUsageCurrent()) # 2
+        data.append(self.__hardware_stats.getMemoryUsageCurrent()) # 3
+        data.append(convertToLargestUnit('KB', int(self.__hardware_stats.getMemoryInfo()['MemTotal']))) # 4
         return data
 ''' 
     def connect(self, controller: Controller):

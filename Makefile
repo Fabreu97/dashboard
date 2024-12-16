@@ -1,6 +1,6 @@
 # Versão do python 3.10.12
 PYTHON = python3
-FILE_RUNNING = model/hardwareStats.py
+FILE_RUNNING = main.py
 PIP	= pip3
 REQUIREMENTS = requirements.txt
 all:

@@ -25,6 +25,8 @@ HEADER_GENERAL_BUTTON_CLICK_EVENT: int = 1
 HEADER_PROCESSOR_BUTTON_CLICK_EVENT: int = 2
 HEADER_MEMORY_BUTTON_CLICK_EVENT: int = 3
 HEADER_PROCESS_BUTTON_CLICK_EVENT: int = 4
+
+UPDATE_TIME_SCREEN: int = 2500
 ###################################################################################################
 
 class View(QMainWindow):
@@ -87,7 +89,7 @@ class View(QMainWindow):
 
         self.__timer: QTimer = QTimer()
         self.__timer.timeout.connect(lambda: self.__screen.update(self.__data))
-        self.__timer.setInterval(4000)
+        self.__timer.setInterval(UPDATE_TIME_SCREEN)
         self.__timer.start()
 
         self.consumer_thread = threading.Thread(target=self.consumerData, name="Consumer", daemon=True)

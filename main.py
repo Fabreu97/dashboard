@@ -1,13 +1,9 @@
 import sys
-import time
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QPushButton, QLabel
-from PyQt6.QtGui import QColor, QPalette
-from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QApplication
 
 from view import View
 from model import Model
 from controller import Controller
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
@@ -18,7 +14,6 @@ if __name__ == "__main__":
     controller = Controller()
 
     # Fazendo configurações iniciais...
-    # P.S.: A ordem importa das conexões.
     controller.connect(model=model)
     view.connect(controller=controller)
 
@@ -34,7 +29,7 @@ if __name__ == "__main__":
 
     '''
         Executando, de forma automatizada pela biblioteca PyQt6, a aplicação.
-        P.S.: O loop de execução do programa esta sendo executado nos bastidores pelo encapsulamento e automatização do PyQt6
+        P.S.: O loop de execução do programa esta sendo executado nos bastidores pelo encapsulamento e automatização do PyQt6.
     '''
 
     view.run()

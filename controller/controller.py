@@ -45,7 +45,7 @@ class Controller:
         s = 0.0
         e = 10.0
         while(True):
-            if( (e - s) > 5.000 ):   
+            if( (e - s) > UPDATE_TIME ):   
                 self.__lock.acquire()
                 self.__model.update()
                 self.__lock.release()
@@ -70,8 +70,5 @@ class Controller:
             self.request_thread.start()
         else:
             print("Erro ao incializar a thread dataRequest por model não está conectado com Controller.")
-    
-    def dataRequestFromTheGeneralScreen2(self):
-        return self.__model.dataRequestFromTheGeneralScreen2()
     
 # end of the Controller class
