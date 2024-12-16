@@ -27,39 +27,49 @@ class Controller:
 
     __lock: threading.Lock = None
 
+    update_thread: threading.Thread = None
+
+    request_thread: threading.Thread = None
+
     def __init__(self) -> None:
         self.__model: Model = None
         self.__lock = threading.Lock()
-    
+        self.update_thread: threading.Thread = None
+        self.request_thread: threading.Thread = None
+
     def connect(self, model: Model) -> None:
         self.__model = model
     
     def __update(self) -> None:
-        s = time.time()
+        global dataReadyToSend
+        s = 0.0
+        e = 10.0
         while(True):
-            e = time.time()
-            if(e-s > UPDATE_TIME):
+            if( (e - s) > 5.000 ):   
                 self.__lock.acquire()
                 self.__model.update()
                 self.__lock.release()
-                s = time.time()
                 print("Atualizando os dados do Model")
+                s = time.time()
+            e = time.time()
                 
-
-
-
     def updateDataFromModel(self) -> None:
-        thread = threading.Thread(target=self.__update, name='update')
-        thread.daemon = True
-        thread.start()
+        if(self.__model is not None):
+            self.update_thread = threading.Thread(target=self.__update, name="updateData", daemon=True)
+            self.update_thread.start()
+        else:
+            print("Erro ao inicializar a thread updateData por model não está conectado com Controller")
+
     '''
         Métodos de Requisições de dados do view e recebendo a resposta do Model.
     '''
 
     def dataRequestFromTheGeneralScreen(self) -> None:
-        request_thread = threading.Thread(target=self.__model.dataRequestFromTheGeneralScreen, name="Data Request Model")
-        request_thread.start()
-        request_thread.join()
+        if(self.__model is not None):
+            self.request_thread = threading.Thread(target=self.__model.dataRequestFromTheGeneralScreen, name="dataRequest", daemon=True)
+            self.request_thread.start()
+        else:
+            print("Erro ao incializar a thread dataRequest por model não está conectado com Controller.")
     
     def dataRequestFromTheGeneralScreen2(self):
         return self.__model.dataRequestFromTheGeneralScreen2()

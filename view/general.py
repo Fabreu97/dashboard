@@ -33,8 +33,8 @@ class GeneralScreen(Screen):
         self.__table.setColumnWidth(1,450)
         self.__table.setColumnWidth(2,200)
         self.__table.setColumnWidth(3,50)
-        self.__table.setColumnWidth(4,200)
-        self.__table.setColumnWidth(5,200)
+        self.__table.setColumnWidth(4,100)
+        self.__table.setColumnWidth(5,125)
         if data is not None:
             self.__table.setRowCount(data[SIZE_OF_THE_PROCESS_LIST])  # Número de linhas
             for i, process in enumerate(data[PROCESS_LIST]):
@@ -43,6 +43,9 @@ class GeneralScreen(Screen):
         self.__layout.addWidget(self.__table)
         #self.__table.resizeColumnsToContents()
         self.__window.setLayout(self.__layout)
+
+
+
     def update(self, data):
         if data is not None:
             self.__table.setRowCount(data[SIZE_OF_THE_PROCESS_LIST])  # Número de linhas

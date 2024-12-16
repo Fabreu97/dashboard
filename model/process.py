@@ -67,7 +67,7 @@ class Process:
         return self.__memory
     def getInfo(self) -> list:
         cpu_usage: str = f""
-        return [self.__PID, self.__command, self.__state, self.__PPID, self.__memory, f"{self.__cpu_usage:.1f}"]
+        return [self.__PID, self.__command, self.__state, self.__PPID, self.__memory, f"{100*self.__cpu_usage:.1f}%"]
     def addProcessChildren(self, process) -> None:
         self.__children.append(process)
     def setWaitChannel(self, wchan: str) -> None:

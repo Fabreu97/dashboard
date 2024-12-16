@@ -3,8 +3,6 @@ import time
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QPushButton, QLabel
 from PyQt6.QtGui import QColor, QPalette
 from PyQt6.QtCore import Qt
-import threading
-
 
 from view import View
 from model import Model
@@ -24,16 +22,14 @@ if __name__ == "__main__":
     controller.connect(model=model)
     view.connect(controller=controller)
 
-    def eventclickGeneralButton():
-        view.headerGeneralButtonClickEvent2()
-    view.addEventClickGeneralButton(eventclickGeneralButton)
-
     # Executando
     '''
-        Executando a Thread de atualização dos dados do Model em cada 5s
+        Executando as Thread de atualização dos dados, de envio dos dados(Produtor) e de recebimento dos dados(Consumer)
     '''
 
-    controller.updateDataFromModel() 
+    controller.updateDataFromModel()
+    controller.dataRequestFromTheGeneralScreen()
+    view.consumer()
 
 
     '''

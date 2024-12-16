@@ -14,6 +14,7 @@ from .processList import ProcessList
 from .processHistory import ProcessHistory
 from .hardwareStats import HardwareStats, STANDARD_TIME_JIFFY
 import queue
+import threading
 ###################################################################################################
 # MACROS : podem virar constante de classe com uso da @property
 ## MACROS para o arquivo /proc/[PID]/stat
@@ -63,17 +64,28 @@ PAGE_SIZE_KB: int = 4
 READ: str = "r"
 ###################################################################################################
 # VARIABLE GLOBAL
-
 ###################################################################################################
 # INFORMATION
 ###################################################################################################
 
 class Model:
+
+    __previousProcesses: ProcessList = None
+
+    __currentProcesses: ProcessList = None
+
+    __history: ProcessHistory = None
+
+    __hardware_stats: HardwareStats = None
+
+    dataReadToSend: threading.Event = None
+
     def __init__(self):
         self.__previousProcesses = ProcessList()
         self.__currentProcesses = ProcessList()
         self.__history = ProcessHistory()
         self.__hardware_stats = HardwareStats()
+        self.dataReadToSend = threading.Event()
 
         pids = []
         path = "/proc"
@@ -197,6 +209,7 @@ class Model:
     def update(self):
         self.updateHardwareStats()
         self.updateProcessesByStats()
+        self.dataReadToSend.set()
     def getInfoProcesses(self) -> list:
         return self.__currentProcesses.getInfo()
     def getHistoryCpuUsage(self, pid: int) -> list:
@@ -206,15 +219,19 @@ class Model:
     def dataRequestFromTheGeneralScreen(self) -> None:
         # importando o buffer
         from controller.controller import buffer_general_screen_data
+        global dataReadyToSend
         # monta os dados no formato que tela Geral possa consumir
-        data: list = []
-        data.append(self.__currentProcesses.length()) # 0
-        data.append(self.__currentProcesses.getInfo()) # 1
-        buffer_general_screen_data.put(data) # enviar
-        print("Model está enviando os dados da Tela Geral...")
+        while(True):
+            self.dataReadToSend.wait()
+            data: list = []
+            data.append(self.__currentProcesses.length()) # 0
+            data.append(self.__currentProcesses.getInfo()) # 1
+            buffer_general_screen_data.put(data) # enviar
+            print("Model está enviando os dados da Tela Geral...")
+            self.dataReadToSend.clear()
+
+
     def dataRequestFromTheGeneralScreen2(self) -> None:
-        # importando o buffer
-        from controller.controller import buffer_general_screen_data
         # monta os dados no formato que tela Geral possa consumir
         data: list = []
         data.append(self.__currentProcesses.length()) # 0
