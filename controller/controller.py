@@ -8,28 +8,20 @@ import queue
 import threading
 import time
 from model.model import Model
+###################################################################################################
+# MACROS
 HEADER_GENERAL_BUTTON_CLICK_EVENT: int = 1
 HEADER_PROCESSOR_BUTTON_CLICK_EVENT: int = 2
 HEADER_MEMORY_BUTTON_CLICK_EVENT: int = 3
 HEADER_PROCESS_BUTTON_CLICK_EVENT: int = 4
-###################################################################################################
-# MACROS
 QUEUE_MAX_SIZE: int = 10
-UPDATE_TIME: float = 5.0
+UPDATE_TIME: float = 1.0
 ###################################################################################################
 # GLOBAL VARIABLE
 ###################################################################################################
 buffer_general_screen_data: queue.Queue = queue.Queue(QUEUE_MAX_SIZE)
 ###################################################################################################
 class Controller:
-
-    __model : Model = None
-
-    __lock: threading.Lock = None
-
-    update_thread: threading.Thread = None
-
-    request_thread: threading.Thread = None
 
     def __init__(self) -> None:
         self.__model: Model = None
@@ -41,7 +33,6 @@ class Controller:
         self.__model = model
     
     def __update(self) -> None:
-        global dataReadyToSend
         s = 0.0
         e = 10.0
         while(True):

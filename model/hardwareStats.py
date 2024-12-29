@@ -4,12 +4,8 @@
 ###################################################################################################
 # IMPORT
 import os
-import time
 from .TimeMetric import TimeMetric
 from .process import convertToLargestUnit
-import matplotlib.pyplot as plt
-import numpy as np
-from matplotlib.ticker import PercentFormatter
 ###################################################################################################
 # MACROS
 READ: str = "r"
@@ -59,6 +55,15 @@ class HardwareStats:
         self.__system_uptime: float = 0.0
         self.__idle_time: float = 0.0
         self.__limit_metric = limit
+        self.__version: str = None
+
+        path = "/proc/version"
+        try:
+            with open(path, "r") as file:
+                line = file.readline().split()
+                self.__version = line[0] + " " + line[1] + " " + line[2]
+        except Exception as e:
+            print(f"Error initial HardwareStats in the path {path}: {e}")
 
         path: str = "/proc/meminfo"
         try:
@@ -86,6 +91,7 @@ class HardwareStats:
                                 self.__processors_info.append(processor_info)
                             processor_info = {}
                         processor_info[key] = value
+                self.__processors_info.append(processor_info)
         except Exception as e:
             print(f"ERROR initial Hardware Stats in the path {path}: {e}")
         
@@ -122,6 +128,7 @@ class HardwareStats:
                     i += 1
         except Exception as e:
             print(f"ERROR initial Hardware Stats in the path {path}: {e}")
+
     def updateStats(self) -> None:
         # update info CPU Total
         path = "/proc/uptime"
@@ -139,6 +146,8 @@ class HardwareStats:
             if cpu_usage_in_percentage < 0.0:
                 cpu_usage_in_percentage = 0.0
             time_metric: TimeMetric = TimeMetric(cpu_usage_in_percentage)
+            if(len(self.__cpu_usage_total) == self.__limit_metric):
+                del self.__cpu_usage_total[0]
             self.__cpu_usage_total.append(time_metric)
             self.__system_uptime = system_uptime
             self.__idle_time = idle_time
@@ -157,7 +166,7 @@ class HardwareStats:
             if len(self.__memory_usage) == self.__limit_metric:
                 del self.__memory_usage[0]
             value = int(self.__memory_info["MemTotal"]) - value
-            time_metric: TimeMetric = TimeMetric(value)
+            time_metric: TimeMetric = TimeMetric(value) 
             self.__memory_usage.append(time_metric)
         except Exception as e:
             print(f"ERROR updateStats of Hardware Stats in the path {path}: {e}")
@@ -188,15 +197,20 @@ class HardwareStats:
                     i += 1
         except Exception as e:
             print(f"ERROR updateStats of Hardware Stats in the path {path}: {e}")
+
     def getMemoryInfo(self) -> dict:
         return self.__memory_info
+    
     def getProcessorsInfo(self) -> list:
         return self.__processors_info
+    
     def getCpuUsageCurrent(self) -> str:
         # return f"{self.__cpu_usage_total[-1]*100:.2f}%"
         return f"{self.__cpu_usage_total[-1].getMetric()*100:.2f}%"
+    
     def getMemoryUsageCurrent(self) -> str:
         return f"{convertToLargestUnit('KB',self.__memory_usage[-1].getMetric())}"
+    
     def getCpuUsage(self) -> list:
         ans: list = []
         time: list = []
@@ -207,25 +221,37 @@ class HardwareStats:
         ans.append(time)
         ans.append(metric)
         return ans
+    
     def getMemoryUsage(self) -> list:
         return self.__memory_usage
+    
     def setLimitMetric(self, limit: int) -> None:
         self.__limit_metric = limit
+
     def getLimitMetric(self) -> int:
         return self.__limit_metric
+    
     def getCpuUsageStatsPerProcessor(self) -> list:
         return self.__cpu_usage_stats_per_processor
+    
     def getCpuUsagePerProcessorCurrent(self) -> list:
         ans: list = []
         for i in range(1,len(self.__cpu_usage_per_processor)):
             ans.append(self.__cpu_usage_per_processor[i][-1].getMetric())
         return ans 
+    
     def getCpuUsagePerProcessor(self) -> list:
         return self.__cpu_usage_per_processor
+    
+    def getProcessorCore(self):
+        return len(self.__processors_info)
+    
+    def getVersionOS(self) -> str:
+        return self.__version
 # end of the class HardwareStats
 
 # Test of class
-
+'''
 if __name__=='__main__':
     stats: HardwareStats = HardwareStats()
     # Ativa o modo interativo
@@ -266,3 +292,4 @@ if __name__=='__main__':
         print("===========================================")
     plt.ioff()
     plt.show()
+'''

@@ -15,7 +15,6 @@ if __name__ == "__main__":
 
     # Fazendo configurações iniciais...
     controller.connect(model=model)
-    view.connect(controller=controller)
 
     # Executando
     '''

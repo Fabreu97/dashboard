@@ -4,16 +4,11 @@
 ###################################################################################################
 # IMPORT
 # from controller.controller import Controller, buffer_general_screen_data
-import matplotlib.pyplot as plt
-from matplotlib.ticker import PercentFormatter
-from datetime import datetime
 import os
-import time
 from .process import Process, getCpuUsage, convertToLargestUnit
 from .processList import ProcessList
 from .processHistory import ProcessHistory
 from .hardwareStats import HardwareStats, STANDARD_TIME_JIFFY
-import queue
 import threading
 ###################################################################################################
 # MACROS : podem virar constante de classe com uso da @property
@@ -69,16 +64,6 @@ READ: str = "r"
 ###################################################################################################
 
 class Model:
-
-    __previousProcesses: ProcessList = None
-
-    __currentProcesses: ProcessList = None
-
-    __history: ProcessHistory = None
-
-    __hardware_stats: HardwareStats = None
-
-    dataReadToSend: threading.Event = None
 
     def __init__(self):
         self.__previousProcesses = ProcessList()
@@ -224,12 +209,20 @@ class Model:
         while(True):
             self.dataReadToSend.wait()
             data: list = []
+            # Montando o pacote de dados a ser enviado . . .
             data.append(self.__currentProcesses.length()) # 0
             data.append(self.__currentProcesses.getInfo()) # 1
             data.append(self.__hardware_stats.getCpuUsageCurrent()) # 2
             data.append(self.__hardware_stats.getMemoryUsageCurrent()) # 3
             data.append(convertToLargestUnit('KB', int(self.__hardware_stats.getMemoryInfo()['MemTotal']))) # 4
             data.append(self.__currentProcesses.getTotalThreads()) # 5
+            data.append(self.__currentProcesses.getRunningProcessCount()) #6
+            data.append(self.__currentProcesses.getSleepingProcessCount()) # 7
+            data.append(self.__currentProcesses.getZumbiProcessCount()) # 8
+            data.append(self.__currentProcesses.getStoppedProcessCount()) # 9
+            data.append(self.__currentProcesses.getIdleProcessCount()) # 10
+            data.append(self.__hardware_stats.getProcessorCore()) # 11
+            data.append(self.__hardware_stats.getVersionOS()) # 12
             buffer_general_screen_data.put(data) # enviar
             print("Model está enviando os dados da Tela Geral...")
             self.dataReadToSend.clear()
@@ -249,7 +242,7 @@ class Model:
         self.__controller = controller
 '''
 # end of the class Model
-
+'''
 # Test of class or unit test
 if __name__=="__main__":
     model: Model = Model()
@@ -294,3 +287,4 @@ if __name__=="__main__":
             plt.draw()
             plt.show()
             plt.pause(3)
+'''

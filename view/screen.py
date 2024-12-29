@@ -4,15 +4,17 @@
 ###################################################################################################
 # IMPORT
 from abc import ABC, abstractmethod
-from PyQt6.QtWidgets import QWidget
 ###################################################################################################
 # MACROS
 ###################################################################################################
 class Screen(ABC):
     @abstractmethod
-    def __init__(self: QWidget):
-        pass
+    def __init__(self):
+        self._data: list = None
     
+    def setData(self, data: list):
+        self._data = data
+
     @abstractmethod
     def update(self):
         pass

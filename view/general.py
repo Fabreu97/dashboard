@@ -9,22 +9,29 @@ from view.screen import Screen
 # MACROS
 ## TABLE
 LABELS_TABLE = ["PID", "NAME", "STATE", "PPID", "MEMORY", "CPU USAGE(%)"]
-POSITION_TABLE_X: int = 20
-POSITION_TABLE_Y: int = 200
-SIZE_TABLE_X: int = 900
-SIZE_TABLE_Y: int = 300
+POSITION_TABLE_X = 20
+POSITION_TABLE_Y = 200
+SIZE_TABLE_X = 900
+SIZE_TABLE_Y = 300
 ## DATA
-SIZE_OF_THE_PROCESS_LIST: int = 0
-PROCESS_LIST: int = 1
-CPU_USAGE: int = 2
-MEMORY_USAGE: int = 3
-MEMORY_TOTAL: int = 4
-TOTAL_THREADS: int = 5
+SIZE_OF_THE_PROCESS_LIST  = 0
+PROCESS_LIST  = 1
+CPU_USAGE = 2
+MEMORY_USAGE  = 3
+MEMORY_TOTAL  = 4
+TOTAL_THREADS = 5
+NUMBER_OF_RUNNING_PROCESSES = 6
+NUMBER_OF_SLEEPING_PROCESSES = 7
+NUMBER_OF_ZUMBI_PROCESSES = 8
+NUMBER_OF_STOPPED_PROCESSES = 9
+NUMBER_OF_IDLE_PROCESSES = 10
+NUMBER_OF_PROCESSING_CORES = 11
+VERSION_OS = 12
 ## LABEL
-STYLE_SHEET: str = "font-size: 16px;"
-INITIAL_LINE_X: int  = 20
-INITIAL_LINE_Y: int = 45
-VERTICAL_SPACE: int = 30
+STYLE_SHEET = "font-size: 16px; font-weight: bold;"
+INITIAL_LINE_X = 20
+INITIAL_LINE_Y = 45
+VERTICAL_SPACE = 30
 
 ###################################################################################################
 
@@ -53,40 +60,58 @@ class GeneralScreen(Screen):
                 for j, info in enumerate(process):
                     self.__table.setItem(i,j, QTableWidgetItem(str(info)))
 
-        self.__text_cpu = QLabel("CPU Usage: undefined", parent=self.__window)
-        self.__text_cpu.move(INITIAL_LINE_X, INITIAL_LINE_Y)
-        self.__text_cpu.setStyleSheet(STYLE_SHEET)
-        self.__text_cpu.adjustSize()
+        self.__line01 = QLabel("CPU Usage:  undefined", parent=self.__window)
+        self.__line01.move(INITIAL_LINE_X, INITIAL_LINE_Y)
+        self.__line01.setStyleSheet(STYLE_SHEET)
+        self.__line01.adjustSize()
 
-        self.__text_memory_total = QLabel("Memory Total: undefined", parent=self.__window)
-        self.__text_memory_total.move(INITIAL_LINE_X, INITIAL_LINE_Y + 1*VERTICAL_SPACE)
-        self.__text_memory_total.setStyleSheet(STYLE_SHEET)
-        self.__text_memory_total.adjustSize()
+        self.__line02 = QLabel(". . .", parent=self.__window)
+        self.__line02.move(INITIAL_LINE_X, INITIAL_LINE_Y + 1*VERTICAL_SPACE)
+        self.__line02.setStyleSheet(STYLE_SHEET)
+        self.__line02.adjustSize()
 
-        self.__text_memory_usage = QLabel("Memory Usage: undefined", parent=self.__window)
-        self.__text_memory_usage.move(INITIAL_LINE_X, INITIAL_LINE_Y + 2*VERTICAL_SPACE)
-        self.__text_memory_usage.setStyleSheet(STYLE_SHEET)
-        self.__text_memory_usage.adjustSize()
+        self.__line03 = QLabel("Memory Total:  undefined", parent=self.__window)
+        self.__line03.move(INITIAL_LINE_X, INITIAL_LINE_Y + 2*VERTICAL_SPACE)
+        self.__line03.setStyleSheet(STYLE_SHEET)
+        self.__line03.adjustSize()
 
-        self.__text_total_threads = QLabel("Total Threads: undefined", parent=self.__window)
-        self.__text_total_threads.move(INITIAL_LINE_X, INITIAL_LINE_Y + 3*VERTICAL_SPACE)
-        self.__text_total_threads.setStyleSheet(STYLE_SHEET)
-        self.__text_total_threads.adjustSize()
+        self.__line04 = QLabel("Memory Usage:  undefined", parent=self.__window)
+        self.__line04.move(INITIAL_LINE_X, INITIAL_LINE_Y + 3*VERTICAL_SPACE)
+        self.__line04.setStyleSheet(STYLE_SHEET)
+        self.__line04.adjustSize()
+
+        self.__line05 = QLabel("Version:  undefined", parent=self.__window)
+        self.__line05.move(INITIAL_LINE_X, INITIAL_LINE_Y + 4*VERTICAL_SPACE)
+        self.__line05.setStyleSheet(STYLE_SHEET + "color: #00FF00;")
+        self.__line05.adjustSize()
+
 
         self.__layout.addWidget(self.__table)
         self.__window.setLayout(self.__layout)
 
 
-    def update(self, data):
-        if data is not None:
-            self.__table.setRowCount(data[SIZE_OF_THE_PROCESS_LIST])  # Número de linhas
-            for i, process in enumerate(data[PROCESS_LIST]):
+    def update(self):
+        if self._data is not None:
+            self.__table.setRowCount(self._data[SIZE_OF_THE_PROCESS_LIST])  # Número de linhas
+            for i, process in enumerate(self._data[PROCESS_LIST]):
                 for j, info in enumerate(process):
                     self.__table.setItem(i,j, QTableWidgetItem(str(info)))
-        self.__text_cpu.setText("CPU Usage: " + data[CPU_USAGE])
-        self.__text_memory_total.setText("Memory Total: " + data[MEMORY_TOTAL])
-        self.__text_memory_usage.setText("Memory Usage: " + data[MEMORY_USAGE])
-        self.__text_total_threads.setText("Total Threads: " + str(data[TOTAL_THREADS]))
+            self.__line01.setText("CPU Usage:  " + self._data[CPU_USAGE] + "                   Total number of processing cores:  " + str(self._data[NUMBER_OF_PROCESSING_CORES]))
+            self.__line01.adjustSize()
+            
+            self.__line02.setText("Tasks:  " + str(self._data[SIZE_OF_THE_PROCESS_LIST]) + "                   Running Tasks:  " + str(self._data[NUMBER_OF_RUNNING_PROCESSES]) + "                   Sleeping Tasks:  " + str(self._data[NUMBER_OF_SLEEPING_PROCESSES]) + "                   Stopped Tasks:  " + str(self._data[NUMBER_OF_STOPPED_PROCESSES]) + "                   Idle Tasks:  " + str(self._data[NUMBER_OF_IDLE_PROCESSES]) + "                   Zumbi Tasks:  " + str(self._data[NUMBER_OF_ZUMBI_PROCESSES]))
+            self.__line02.adjustSize()
+            
+            self.__line03.setText("Memory Total:  " + self._data[MEMORY_TOTAL] + "                   Memory Usage:  " + str(self._data[MEMORY_USAGE]))
+            self.__line03.adjustSize()
+
+            self.__line04.setText("Total Threads:  " + str(self._data[TOTAL_THREADS]))
+            self.__line04.adjustSize()
+
+            self.__line05.setText("Version:  " + self._data[VERSION_OS])
+            self.__line05.adjustSize()
+            
+            self._data = None
 
         # self.__window.show()
 # end of the class General Screen

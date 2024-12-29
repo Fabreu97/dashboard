@@ -1,4 +1,4 @@
-# Class to perform graphical interface oeprations
+# Class to perform graphical interface operations
 # Author: Fernando Abreu e Augusto Rosa
 # Date: 12/09/2024
 ###################################################################################################
@@ -11,7 +11,6 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget
 from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QColor, QPalette
 from view.header import Header
-from view.screen import Screen
 from view.general import GeneralScreen
 ###################################################################################################
 # MACROS
@@ -26,31 +25,10 @@ HEADER_PROCESSOR_BUTTON_CLICK_EVENT: int = 2
 HEADER_MEMORY_BUTTON_CLICK_EVENT: int = 3
 HEADER_PROCESS_BUTTON_CLICK_EVENT: int = 4
 
-UPDATE_TIME_SCREEN: int = 2500
+UPDATE_TIME_SCREEN: int = 500 # ms
 ###################################################################################################
 
 class View(QMainWindow):
-    __app: QApplication = None
-
-    __window: QWidget = None 
-
-    __palette: QPalette = None
-
-    __header: Header = None
-
-    __screen: Screen = None
-
-    __select_header_button: int = None
-
-    __header_buttons_click_event: int = NOT_EVENT
-
-    __controller : Controller = None
-
-    __data: list = None
-
-    __timer: QTimer = None
-
-    consumer_thread: threading.Thread = None
 
     def __init__(self, app: QApplication):
         super().__init__()
@@ -84,36 +62,24 @@ class View(QMainWindow):
         self.__header_buttons_click_event: int = NOT_EVENT
 
         self.__controller: Controller = None
-
-        self.__data = None
-
+        
         self.__timer: QTimer = QTimer()
-        self.__timer.timeout.connect(lambda: self.__screen.update(self.__data))
+        self.__timer.timeout.connect(self.__screen.update)
         self.__timer.setInterval(UPDATE_TIME_SCREEN)
         self.__timer.start()
 
         self.consumer_thread = threading.Thread(target=self.consumerData, name="Consumer", daemon=True)
-        
-    def updateData(self):
-        if self.__controller is not None:
-            self.__data = self.__controller.dataRequestFromTheGeneralScreen2()
-
 
     def connect(self, controller: Controller):
         self.__controller = controller
 
     def consumerData(self):
         while(True):
-            self.__data = buffer_general_screen_data.get()
+            self.__screen.setData(buffer_general_screen_data.get())
             print("View consumindo os dados...")
 
     def consumer(self):
         self.consumer_thread.start()
-
-    def consumerDataGeneralScreen(self) -> None:
-        self.__data = buffer_general_screen_data.get()
-        print(self.__data[0])
-        print("View consumindo os dados...")
 
     def run(self):
         self.__window.show()
@@ -121,27 +87,22 @@ class View(QMainWindow):
 
     ''' Click Event Function for Header Buttons. '''
 
-    def addEventClickGeneralButton(self, func):
-        self.__header.eventClickGeneralButton(func)
-
-
     def headerGeneralButtonClickEvent(self):
-        print("Botão Geral Apertado")
+        print("General")
+        self.__header_buttons_click_event = HEADER_GENERAL_BUTTON_CLICK_EVENT
+        # Here the context change will happen
     
     def headerProcessorButtonClickEvent(self):
         self.__header_buttons_click_event = HEADER_PROCESSOR_BUTTON_CLICK_EVENT
         print("Processor")
+        # Here the context change will happen
     def headerMemoryButtonClickEvent(self):
         self.__header_buttons_click_event = HEADER_MEMORY_BUTTON_CLICK_EVENT
         print("Memory")
+        # Here the context change will happen
 
     def headerProcessButtonClickEvent(self):
         self.__header_buttons_click_event = HEADER_PROCESS_BUTTON_CLICK_EVENT
+        # Here the context change will happen
 
-    def updateDataFromModel(self):
-        self.__controller.updateDataFromModel()
 # end of the class View
-
-if __name__=='__main__':
-    view: View = View()
-    view.run()
