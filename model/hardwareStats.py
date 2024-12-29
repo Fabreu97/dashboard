@@ -57,11 +57,11 @@ class HardwareStats:
         self.__limit_metric = limit
         self.__version: str = None
 
-        path = "/proc/version"
+        path = "/etc/os-release"
         try:
             with open(path, "r") as file:
-                line = file.readline().split()
-                self.__version = line[0] + " " + line[1] + " " + line[2]
+                aux = len("PRETTY_NAME=")
+                self.__version = file.readline()[aux+1:-1]
         except Exception as e:
             print(f"Error initial HardwareStats in the path {path}: {e}")
 
