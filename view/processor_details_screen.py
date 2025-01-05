@@ -1,26 +1,19 @@
-# Abstract Class for each screen
+# Class for application General Screen
 # Author: Fernando Abreu e Augusto Rosa
-# Date: 12/10/2024
+# Date: 01/05/2025
 ###################################################################################################
 # IMPORT
-from abc import ABC, abstractmethod
-from PyQt6.QtWidgets import QWidget
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QApplication, QLabel
+from view.screen import Screen
 ###################################################################################################
 # MACROS
 ###################################################################################################
-# CLASS
+#CLASS
 ###################################################################################################
-class Screen(QWidget):
-    @abstractmethod
+class ProcessorDetailsScreen(Screen):
     def __init__(self, parent: QWidget):
-        QWidget.__init__(self,parent=parent)
-        ABC.__init__(self)
-        self._data: list = None
-    
-    def setData(self, data: list):
-        self._data = data
+        Screen.__init__(self, parent=parent)
 
-    @abstractmethod
-    def update(self):
-        pass
+
 ###################################################################################################
+

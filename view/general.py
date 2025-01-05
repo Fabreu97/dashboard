@@ -27,31 +27,25 @@ NUMBER_OF_STOPPED_PROCESSES = 9
 NUMBER_OF_IDLE_PROCESSES = 10
 NUMBER_OF_PROCESSING_CORES = 11
 VERSION_OS = 12
-## LABEL
+
 STYLE_SHEET = "font-size: 16px; font-weight: bold;"
-INITIAL_LINE_X = 20
-INITIAL_LINE_Y = 45
-VERTICAL_SPACE = 30
 
 ###################################################################################################
 
 class GeneralScreen(Screen):
-    def __init__(self, app: QApplication, window: QWidget, data = None):
-        super().__init__()
-        self.__app = app
-        self.__window = window
-
+    def __init__(self, parent: QWidget, data = None):
+        Screen.__init__(self, parent=parent)
+        self.__data: list = None
         self.__layout = QVBoxLayout()
-        self.__layout.setContentsMargins(20, POSITION_TABLE_Y + 30, 20, 10)
 
         self.__table = QTableWidget()
         self.__table.setColumnCount(len(LABELS_TABLE))
         self.__table.setHorizontalHeaderLabels(LABELS_TABLE)
         self.__table.setGeometry(POSITION_TABLE_X, POSITION_TABLE_Y, SIZE_TABLE_X, SIZE_TABLE_Y)
-        self.__table.setColumnWidth(0,50)
+        self.__table.setColumnWidth(0,75)
         self.__table.setColumnWidth(1,450)
         self.__table.setColumnWidth(2,200)
-        self.__table.setColumnWidth(3,50)
+        self.__table.setColumnWidth(3,75)
         self.__table.setColumnWidth(4,100)
         self.__table.setColumnWidth(5,125)
         if data is not None:
@@ -60,35 +54,29 @@ class GeneralScreen(Screen):
                 for j, info in enumerate(process):
                     self.__table.setItem(i,j, QTableWidgetItem(str(info)))
 
-        self.__line01 = QLabel("CPU Usage:  undefined", parent=self.__window)
-        self.__line01.move(INITIAL_LINE_X, INITIAL_LINE_Y)
+        self.__line01 = QLabel(text="CPU Usage:  undefined", parent=self)
         self.__line01.setStyleSheet(STYLE_SHEET)
-        self.__line01.adjustSize()
+        self.__layout.addWidget(self.__line01)
 
-        self.__line02 = QLabel(". . .", parent=self.__window)
-        self.__line02.move(INITIAL_LINE_X, INITIAL_LINE_Y + 1*VERTICAL_SPACE)
+        self.__line02 = QLabel(text=". . .", parent=self)
         self.__line02.setStyleSheet(STYLE_SHEET)
-        self.__line02.adjustSize()
+        self.__layout.addWidget(self.__line02)
 
-        self.__line03 = QLabel("Memory Total:  undefined", parent=self.__window)
-        self.__line03.move(INITIAL_LINE_X, INITIAL_LINE_Y + 2*VERTICAL_SPACE)
+        self.__line03 = QLabel(text="Memory Total:  undefined", parent=self)
         self.__line03.setStyleSheet(STYLE_SHEET)
-        self.__line03.adjustSize()
+        self.__layout.addWidget(self.__line03)
 
-        self.__line04 = QLabel("Memory Usage:  undefined", parent=self.__window)
-        self.__line04.move(INITIAL_LINE_X, INITIAL_LINE_Y + 3*VERTICAL_SPACE)
+        self.__line04 = QLabel(text="Memory Usage:  undefined", parent=self)
         self.__line04.setStyleSheet(STYLE_SHEET)
-        self.__line04.adjustSize()
+        self.__layout.addWidget(self.__line04)
 
-        self.__line05 = QLabel("Version:  undefined", parent=self.__window)
-        self.__line05.move(INITIAL_LINE_X, INITIAL_LINE_Y + 4*VERTICAL_SPACE)
+        self.__line05 = QLabel(text="Version:  undefined", parent=self)
         self.__line05.setStyleSheet(STYLE_SHEET + "color: #00FF00;")
-        self.__line05.adjustSize()
-
+        self.__layout.addWidget(self.__line05)
 
         self.__layout.addWidget(self.__table)
-        self.__window.setLayout(self.__layout)
-
+        self.setLayout(self.__layout)
+        self.adjustSize()
 
     def update(self):
         if self._data is not None:
@@ -112,6 +100,39 @@ class GeneralScreen(Screen):
             self.__line05.adjustSize()
             
             self._data = None
+    
+    def __del__(self):
+        # Se o layout existir, remover e destruir todos os widgets
+        
+        # Destruir os widgets específicos, caso não tenha sido feito no loop acima
+        if self.__table is not None:
+            self.__table.deleteLater()
+        if self.__line01 is not None:
+            self.__line01.deleteLater()
+        if self.__line02 is not None:
+            self.__line02.deleteLater()
+        if self.__line03 is not None:
+            self.__line03.deleteLater()
+        if self.__line04 is not None:
+            self.__line04.deleteLater()
+        if self.__line05 is not None:
+            self.__line05.deleteLater()
+
+        # Garantir que o layout e widgets sejam removidos
+        self.__layout = None
+        self.__table = None
+        self.__line01 = None
+        self.__line02 = None
+        self.__line03 = None
+        self.__line04 = None
+        self.__line05 = None
+
+        # Certificar que a referência para self.__window não é apagada
+        # Isso mantém self.__window intacto, permitindo sua reutilização
+        print("GeneralScreen foi destruída, widgets e layouts removidos.")
+
+
+
 
         # self.__window.show()
 # end of the class General Screen

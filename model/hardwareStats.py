@@ -61,7 +61,7 @@ class HardwareStats:
         try:
             with open(path, "r") as file:
                 aux = len("PRETTY_NAME=")
-                self.__version = file.readline()[aux+1:-1]
+                self.__version = file.readline()[aux+1:-2]
         except Exception as e:
             print(f"Error initial HardwareStats in the path {path}: {e}")
 
