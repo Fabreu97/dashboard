@@ -9,11 +9,7 @@ from view.screen import Screen
 # MACROS
 ## TABLE
 LABELS_TABLE = ["PID", "NAME", "STATE", "PPID", "MEMORY", "CPU USAGE(%)"]
-POSITION_TABLE_X = 20
-POSITION_TABLE_Y = 200
-SIZE_TABLE_X = 900
-SIZE_TABLE_Y = 300
-## DATA
+## DATA PACKAGE
 SIZE_OF_THE_PROCESS_LIST  = 0
 PROCESS_LIST  = 1
 CPU_USAGE = 2
@@ -35,13 +31,11 @@ STYLE_SHEET = "font-size: 16px; font-weight: bold;"
 class GeneralScreen(Screen):
     def __init__(self, parent: QWidget, data = None):
         Screen.__init__(self, parent=parent)
-        self.__data: list = None
         self.__layout = QVBoxLayout()
 
         self.__table = QTableWidget()
         self.__table.setColumnCount(len(LABELS_TABLE))
         self.__table.setHorizontalHeaderLabels(LABELS_TABLE)
-        self.__table.setGeometry(POSITION_TABLE_X, POSITION_TABLE_Y, SIZE_TABLE_X, SIZE_TABLE_Y)
         self.__table.setColumnWidth(0,75)
         self.__table.setColumnWidth(1,450)
         self.__table.setColumnWidth(2,200)
@@ -85,54 +79,10 @@ class GeneralScreen(Screen):
                 for j, info in enumerate(process):
                     self.__table.setItem(i,j, QTableWidgetItem(str(info)))
             self.__line01.setText("CPU Usage:  " + self._data[CPU_USAGE] + "                   Total number of processing cores:  " + str(self._data[NUMBER_OF_PROCESSING_CORES]))
-            self.__line01.adjustSize()
-            
             self.__line02.setText("Tasks:  " + str(self._data[SIZE_OF_THE_PROCESS_LIST]) + "                   Running Tasks:  " + str(self._data[NUMBER_OF_RUNNING_PROCESSES]) + "                   Sleeping Tasks:  " + str(self._data[NUMBER_OF_SLEEPING_PROCESSES]) + "                   Stopped Tasks:  " + str(self._data[NUMBER_OF_STOPPED_PROCESSES]) + "                   Idle Tasks:  " + str(self._data[NUMBER_OF_IDLE_PROCESSES]) + "                   Zumbi Tasks:  " + str(self._data[NUMBER_OF_ZUMBI_PROCESSES]))
-            self.__line02.adjustSize()
-            
             self.__line03.setText("Memory Total:  " + self._data[MEMORY_TOTAL] + "                   Memory Usage:  " + str(self._data[MEMORY_USAGE]))
-            self.__line03.adjustSize()
-
             self.__line04.setText("Total Threads:  " + str(self._data[TOTAL_THREADS]))
-            self.__line04.adjustSize()
-
             self.__line05.setText("Version:  " + self._data[VERSION_OS])
-            self.__line05.adjustSize()
-            
             self._data = None
-    
-    def __del__(self):
-        # Se o layout existir, remover e destruir todos os widgets
-        
-        # Destruir os widgets específicos, caso não tenha sido feito no loop acima
-        if self.__table is not None:
-            self.__table.deleteLater()
-        if self.__line01 is not None:
-            self.__line01.deleteLater()
-        if self.__line02 is not None:
-            self.__line02.deleteLater()
-        if self.__line03 is not None:
-            self.__line03.deleteLater()
-        if self.__line04 is not None:
-            self.__line04.deleteLater()
-        if self.__line05 is not None:
-            self.__line05.deleteLater()
-
-        # Garantir que o layout e widgets sejam removidos
-        self.__layout = None
-        self.__table = None
-        self.__line01 = None
-        self.__line02 = None
-        self.__line03 = None
-        self.__line04 = None
-        self.__line05 = None
-
-        # Certificar que a referência para self.__window não é apagada
-        # Isso mantém self.__window intacto, permitindo sua reutilização
-        print("GeneralScreen foi destruída, widgets e layouts removidos.")
-
-
-
-
-        # self.__window.show()
+            self.adjustSize()
 # end of the class General Screen

@@ -10,11 +10,11 @@ import time
 ###################################################################################################
 class TimeMetric:
     def __init__(self, metric: float | int, time: float = time.time()) -> None:
-        self.__metric: float = metric
+        self.__metric = metric
         self.__time: float = time
     def setMetric(self, metric: float) -> None:
         self.__metric = metric
-    def getMetric(self) -> float:
+    def getMetric(self) -> float | int:
         return self.__metric
     def setTime(self, time: float) -> None:
         self.__time = time

@@ -71,6 +71,7 @@ class Model:
         self.__history = ProcessHistory()
         self.__hardware_stats = HardwareStats()
         self.dataReadToSend = threading.Event()
+        self.dataReadToSendProcessorScreen = threading.Event() 
 
         pids = []
         path = "/proc"
@@ -195,6 +196,7 @@ class Model:
         self.updateHardwareStats()
         self.updateProcessesByStats()
         self.dataReadToSend.set()
+        self.dataReadToSendProcessorScreen.set()
     def getInfoProcesses(self) -> list:
         return self.__currentProcesses.getInfo()
     def getHistoryCpuUsage(self, pid: int) -> list:
@@ -204,7 +206,6 @@ class Model:
     def dataRequestFromTheGeneralScreen(self) -> None:
         # importando o buffer
         from controller.controller import buffer_general_screen_data
-        global dataReadyToSend
         # monta os dados no formato que tela Geral possa consumir
         while(True):
             self.dataReadToSend.wait()
@@ -227,64 +228,17 @@ class Model:
             print("Model está enviando os dados da Tela Geral...")
             self.dataReadToSend.clear()
 
+    def dataRequestFromTheProcessorDetailsScreen(self) -> None:
+        # importar o buffer
+        from controller.controller import buffer_processor_details_screen_data
+        while(True):
+            self.dataReadToSendProcessorScreen.wait()
+            # Montando o pacores de dados a ser enviado . . .
+            data = []
+            data.append(self.__hardware_stats.getCpuUsage()) # 1
+            # Enviando os dados
+            buffer_processor_details_screen_data.put(data)
+            print("Model está enviando os dados da Tela de Detalhes do Processador...")
+            self.dataReadToSendProcessorScreen.clear()
 
-    def dataRequestFromTheGeneralScreen2(self) -> None:
-        # monta os dados no formato que tela Geral possa consumir
-        data: list = []
-        data.append(self.__currentProcesses.length()) # 0
-        data.append(self.__currentProcesses.getInfo()) # 1
-        data.append(self.__hardware_stats.getCpuUsageCurrent()) # 2
-        data.append(self.__hardware_stats.getMemoryUsageCurrent()) # 3
-        data.append(convertToLargestUnit('KB', int(self.__hardware_stats.getMemoryInfo()['MemTotal']))) # 4
-        return data
-''' 
-    def connect(self, controller: Controller):
-        self.__controller = controller
-'''
 # end of the class Model
-'''
-# Test of class or unit test
-if __name__=="__main__":
-    model: Model = Model()
-    plt.ion()
-    while True:
-        time.sleep(5)
-        start_time = time.time()
-        model.update()
-        end_time = time.time()
-        info_processes = model.getInfoProcesses()
-        cpu_usage_total: float = 0.0
-        max: float = 0.0
-        pp: int = 0
-        name = ""
-        for p in info_processes:
-            info = p.getInfo()
-            cpu_usage_total += info[5]
-            if max < info[5]:
-                max = info[5]
-                pp = info[0]
-                name = info[1]
-            print(f"{info[0]:^8} {info[1]:^39} {info[2]:^12} {info[3]:^8} {info[4]:^8}  {info[5]*100:^4.1f}%")
-            print("")
-        s = time.time()
-        cpu_usage_history = model.getHistoryCpuUsage(pp)
-        e = time.time()
-        print(f"Get Data from History: {(e-s)*1000:.2f}ms")
-        print(f"Elapsed Time for update: {(end_time - start_time)*1000:.1f}ms")
-        print(f"CPU usage by the sum of each process: {cpu_usage_total*100: .2f}%")
-        print(f"CPU usage Total: {model.getCpuUsageCurrent()}")
-        print(f"Memory usage: {model.getMemoryUsageCurrent()}")
-        if len(cpu_usage_history) > 0:
-            # Converter os timestamps para objetos datetime
-            dates = [datetime.fromtimestamp(ts) for ts in cpu_usage_history[0]]
-            plt.clf()
-            plt.plot(dates, cpu_usage_history[1])
-            plt.grid(True, color='gray', linestyle='--', linewidth=0.5)
-            plt.title(name)
-            plt.xlabel("time")
-            plt.ylabel("CPU USAGE %")
-            plt.gca().yaxis.set_major_formatter(PercentFormatter(xmax=1))
-            plt.draw()
-            plt.show()
-            plt.pause(3)
-'''

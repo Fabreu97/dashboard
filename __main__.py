@@ -21,8 +21,14 @@ if __name__ == "__main__":
         Executando as Thread de atualização dos dados, de envio dos dados(Produtor) e de recebimento dos dados(Consumer)
     '''
 
+    # Thread de Atualização de dados
     controller.updateDataFromModel()
+
+    # Inicializando as Threads de Produção dos dados
     controller.dataRequestFromTheGeneralScreen()
+    controller.dataRequestFromTheProcessorDetailsScreen()
+
+    # Inicializando as Threads de Consumação dos dados
     view.consumer()
 
 

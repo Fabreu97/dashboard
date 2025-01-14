@@ -20,6 +20,7 @@ UPDATE_TIME: float = 1.0
 # GLOBAL VARIABLE
 ###################################################################################################
 buffer_general_screen_data: queue.Queue = queue.Queue(QUEUE_MAX_SIZE)
+buffer_processor_details_screen_data = queue.Queue(QUEUE_MAX_SIZE)
 ###################################################################################################
 class Controller:
 
@@ -28,6 +29,7 @@ class Controller:
         self.__lock = threading.Lock()
         self.update_thread: threading.Thread = None
         self.request_thread: threading.Thread = None
+        self.request_thread_processor_screen: threading.Thread = None
 
     def connect(self, model: Model) -> None:
         self.__model = model
@@ -60,6 +62,14 @@ class Controller:
             self.request_thread = threading.Thread(target=self.__model.dataRequestFromTheGeneralScreen, name="dataRequest", daemon=True)
             self.request_thread.start()
         else:
-            print("Erro ao incializar a thread dataRequest por model não está conectado com Controller.")
+            print("Erro ao inicializar a thread dataRequest por model não está conectado com Controller.")
+
+    def dataRequestFromTheProcessorDetailsScreen(self) -> None:
+        if(self.__model is not None):
+            self.request_thread_processor_screen = threading.Thread(target=self.__model.dataRequestFromTheProcessorDetailsScreen, name="dataRequestProcessorScreen", daemon=True)
+            self.request_thread_processor_screen.start()
+        else:
+            print("Erro ao inicializar a thread dataRequest por model não está conectado com Controller.")
+
     
 # end of the Controller class
