@@ -15,7 +15,7 @@ HEADER_PROCESSOR_BUTTON_CLICK_EVENT: int = 2
 HEADER_MEMORY_BUTTON_CLICK_EVENT: int = 3
 HEADER_PROCESS_BUTTON_CLICK_EVENT: int = 4
 QUEUE_MAX_SIZE: int = 10
-UPDATE_TIME: float = 1.0
+UPDATE_TIME: float = 2.0
 ###################################################################################################
 # GLOBAL VARIABLE
 ###################################################################################################

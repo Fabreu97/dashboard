@@ -86,8 +86,8 @@ class View():
 
         self.__timer_Processor = QTimer()
         self.__timer_Processor.timeout.connect(self.__processor_details_screen.update)
-        self.__timer_Processor.setInterval(200)
-        self.__timer_Processor.start()
+        self.__timer_Processor.setInterval(UPDATE_TIME_SCREEN)
+        #self.__timer_Processor.start()
 
         self.consumer_general_thread = threading.Thread(target=self.consumerData, name="Consumer General Screen", daemon=True)
         self.consumer_processor_details_screen_thread = threading.Thread(target=self.consumerDataFromProcessorDetails, name="Consumer Processor Details Screen", daemon=True)
@@ -136,7 +136,7 @@ class View():
         if self.__timer_General.isActive():
             self.__timer_General.stop()
             print("Timer Atualização da Tela Geral parado!")
-        if self.__timer_Processor.isActive():
+        if not self.__timer_Processor.isActive():
             self.__timer_Processor.start()
         self.__screen_layout.setCurrentIndex(1)
         # Here the context change will happen

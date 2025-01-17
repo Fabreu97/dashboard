@@ -7,7 +7,7 @@ from .process import Process
 from .processList import ProcessList
 ###################################################################################################
 # MACROS
-SIZE_LIMIT: int = 60
+SIZE_LIMIT: int = 30
 ###################################################################################################
 class ProcessHistory:
     def __init__(self) -> None:

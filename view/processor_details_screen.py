@@ -11,7 +11,9 @@ import datetime
 ###################################################################################################
 # MACROS
 ## DATA PACKAGE
-
+## GRAPH CONFIG
+BACKGROUND_COLOR = "#000000"
+TEXT_COLOR = "white"
 ###################################################################################################
 #CLASS
 
@@ -23,6 +25,18 @@ class ProcessorDetailsScreen(Screen):
         self.graph_cpu_usage = Figure()
         self.axes = self.graph_cpu_usage.add_subplot(111)
         self.canvas_cpu_usage = FigureCanvasQTAgg(self.graph_cpu_usage)
+
+        # Configurações básicas do gráfico
+        self.graph_cpu_usage.set_facecolor("black")
+
+        self.axes.set_title("CPU usage in %", color=TEXT_COLOR)
+        self.axes.set_xlabel("time", color=TEXT_COLOR)
+        self.axes.set_ylabel("Usage in %", color=TEXT_COLOR)
+        self.axes.set_facecolor(BACKGROUND_COLOR)
+
+        # Personalizando os ticks dos eixos
+        self.axes.tick_params(axis="x", colors=TEXT_COLOR)  # Cor dos ticks do eixo X
+        self.axes.tick_params(axis="y", colors=TEXT_COLOR)  # Cor dos ticks do eixo Y
 
         self.__layout.addWidget(self.canvas_cpu_usage)
         self.setLayout(self.__layout)
@@ -37,13 +51,23 @@ class ProcessorDetailsScreen(Screen):
             self.axes.cla()
 
             # Configurações básicas do gráfico
-            self.axes.set_title("CPU usage in %")
-            self.axes.set_xlabel("time")
-            self.axes.set_ylabel("Usage in %")
+            self.graph_cpu_usage.set_facecolor("black")
+
+            self.axes.set_title("CPU usage in %", color=TEXT_COLOR)
+            self.axes.set_xlabel("time", color=TEXT_COLOR)
+            self.axes.set_ylabel("Usage in %", color=TEXT_COLOR)
+            self.axes.set_facecolor(BACKGROUND_COLOR)
+
+            # Personalizando os ticks dos eixos
+            self.axes.tick_params(axis="x", colors=TEXT_COLOR)  # Cor dos ticks do eixo X
+            self.axes.tick_params(axis="y", colors=TEXT_COLOR)  # Cor dos ticks do eixo Y
 
             # Plotando os novos dados
-            self.axes.plot(dates, self._data[0][1], 'r', label="CPU Usage")
-            self.axes.legend()  # Adiciona a legenda
+            self.axes.plot(dates, self._data[0][1], color="green",linestyle='-', linewidth=2, label="CPU Usage")
+            self.axes.grid(True, color="white", linestyle="--", linewidth=0.5, alpha=0.7)
+            legend = self.axes.legend(facecolor=(0,0,0,0.5)  , edgecolor="white", fontsize="12")  # Adiciona a legenda
+            for text in legend.get_texts():
+                text.set_color("white")  # Cor do texto da legenda
 
             # Ajustar os rótulos do eixo X
             self.axes.set_xticks(dates)  # Define os ticks no eixo X
