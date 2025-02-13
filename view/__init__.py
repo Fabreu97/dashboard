@@ -1,3 +1,3 @@
 # __init__.py
 
-from .view import *
+from .view import View

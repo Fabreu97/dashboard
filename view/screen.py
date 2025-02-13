@@ -8,11 +8,19 @@ from PyQt6.QtWidgets import QWidget
 ###################################################################################################
 # MACROS
 ###################################################################################################
-class Screen(ABC):
+# CLASS
+###################################################################################################
+class Screen(QWidget):
     @abstractmethod
-    def __init__(self: QWidget):
-        pass
+    def __init__(self, parent: QWidget):
+        QWidget.__init__(self,parent=parent)
+        ABC.__init__(self)
+        self._data: list = None
     
+    def setData(self, data: list):
+        self._data = data
+
     @abstractmethod
     def update(self):
         pass
+###################################################################################################

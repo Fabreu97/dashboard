@@ -1,4 +1,4 @@
-# Class to perform graphical interface oeprations
+# Class to perform graphical interface operations
 # Author: Fernando Abreu e Augusto Rosa
 # Date: 12/09/2024
 ###################################################################################################
@@ -6,30 +6,35 @@
 ###################################################################################################
 import sys
 import threading
-from controller.controller import Controller, buffer_general_screen_data
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget
-from PyQt6.QtCore import QTimer
+from controller.controller import Controller, buffer_general_screen_data, buffer_processor_details_screen_data
+from PyQt6.QtWidgets import QApplication, QWidget, QMainWindow, QVBoxLayout, QStackedLayout
+from PyQt6.QtCore import QTimer, QSize
 from PyQt6.QtGui import QColor, QPalette
 from view.header import Header
-from view.screen import Screen
 from view.general import GeneralScreen
+<<<<<<< HEAD
 from PyQt6 import QtCore
 from PyQt6 import QtGui
 import time
+=======
+from view.processor_details_screen import ProcessorDetailsScreen
+>>>>>>> the_last_dance
 ###################################################################################################
 # MACROS
 ###################################################################################################
-TITLE: str = "Dashboard - Gerenciador de Tarefas"
-WINDOW_SIZE_X: int = 1200
-WINDOW_SIZE_Y: int = 700
+TITLE: str = "Dashboard"
+MINIMUM_SIZE = QSize(1100, 600)
 
 NOT_EVENT: int = 0
 HEADER_GENERAL_BUTTON_CLICK_EVENT: int = 1
 HEADER_PROCESSOR_BUTTON_CLICK_EVENT: int = 2
 HEADER_MEMORY_BUTTON_CLICK_EVENT: int = 3
 HEADER_PROCESS_BUTTON_CLICK_EVENT: int = 4
+
+UPDATE_TIME_SCREEN: int = 1000 # ms
 ###################################################################################################
 
+<<<<<<< HEAD
 class Communicate(QtCore.QObject):
     update_signal = QtCore.pyqtSignal(object)
 
@@ -53,13 +58,24 @@ class View(QMainWindow):
     __data: list = None
 
     __timer: QTimer = None
+=======
+class View():
+>>>>>>> the_last_dance
 
     def __init__(self, app: QApplication):
-        super().__init__()
         self.__app = app
-        self.__window = QWidget()
+        self.__window = QMainWindow()
         self.__window.setWindowTitle(TITLE)
-        self.__window.setFixedSize(WINDOW_SIZE_X, WINDOW_SIZE_Y)
+        self.__window.setMinimumSize(MINIMUM_SIZE)
+        self.__window.setMaximumSize(app.primaryScreen().size())
+
+        self.__widget = QWidget(parent=self.__window)
+        self.__main_layout = QVBoxLayout()
+        self.__widget.setLayout(self.__main_layout)
+            
+        self.__screen_widget = QWidget(parent=self.__widget)
+        self.__screen_layout = QStackedLayout()
+        self.__screen_widget.setLayout(self.__screen_layout)
 
         self.__palette = QPalette()
         self.__palette.setColor(QPalette.ColorRole.Window, QColor(53, 53, 53))  # Cor de fundo da janela
@@ -75,14 +91,32 @@ class View(QMainWindow):
         # Aplica o QPalette ao aplicativo
         self.__app.setPalette(self.__palette)
 
-        self.__header = Header(self.__window)
+        self.__header = Header(self.__widget)
+        self.__header.eventClickGeneralButton(self.headerGeneralButtonClickEvent)
+        self.__header.eventClickProcessorButton(self.headerProcessorButtonClickEvent)
+        self.__header.eventClickMemoryButton(self.headerMemoryButtonClickEvent)
+        self.__header.eventClickProcessButton(self.headerProcessButtonClickEvent)
+        self.__main_layout.addWidget(self.__header)
 
-        self.__screen = GeneralScreen(self.__app, self.__window)
+        self.__general_screen = GeneralScreen(self.__widget)
+        self.__screen_layout.addWidget(self.__general_screen)
+        self.__main_layout.addWidget(self.__screen_widget)
+
+        self.__processor_details_screen = ProcessorDetailsScreen(self.__widget)
+        self.__screen_layout.addWidget(self.__processor_details_screen)
+        
+        self.__window.setCentralWidget(self.__widget)
 
         self.__header_buttons_click_event: int = NOT_EVENT
 
         self.__controller: Controller = None
+        
+        self.__timer_General: QTimer = QTimer()
+        self.__timer_General.timeout.connect(self.__general_screen.update)
+        self.__timer_General.setInterval(UPDATE_TIME_SCREEN)
+        self.__timer_General.start()
 
+<<<<<<< HEAD
         self.__data = None
 
         self.__dataGeneral = None
@@ -109,10 +143,20 @@ class View(QMainWindow):
     def updateData(self):
         if self.__controller is not None:
             self.__data = self.__controller.dataRequestFromTheGeneralScreen2()
+=======
+        self.__timer_Processor = QTimer()
+        self.__timer_Processor.timeout.connect(self.__processor_details_screen.update)
+        self.__timer_Processor.setInterval(UPDATE_TIME_SCREEN)
+        #self.__timer_Processor.start()
+>>>>>>> the_last_dance
 
+        self.consumer_general_thread = threading.Thread(target=self.consumerData, name="Consumer General Screen", daemon=True)
+        self.consumer_processor_details_screen_thread = threading.Thread(target=self.consumerDataFromProcessorDetails, name="Consumer Processor Details Screen", daemon=True)
+        self.lock = threading.Lock()
 
     def connect(self, controller: Controller):
         self.__controller = controller
+<<<<<<< HEAD
         consumer_thread = threading.Thread(target=self.consumerDataGeneralScreen)
         consumer_thread.daemon = True
         consumer_thread.start() # O consumidor espera o dado do buffer
@@ -128,6 +172,28 @@ class View(QMainWindow):
                 print("View consumindo os dados...")
             else:
                 time.sleep(0.1)
+=======
+
+    def consumerData(self):
+        while(True):
+            if(self.__general_screen is not None):
+                #self.lock.acquire()
+                self.__general_screen.setData(buffer_general_screen_data.get())
+                #self.lock.release()
+                print("View consumindo os dados da Tela Geral...")
+
+    def consumerDataFromProcessorDetails(self):
+        while(True):
+            #self.lock.acquire()
+            self.__processor_details_screen.setData(buffer_processor_details_screen_data.get())
+            #self.lock.release()
+            print("View consumindo os dados da Tela de Detalhes do Processador...")
+
+
+    def consumer(self):
+        self.consumer_general_thread.start()
+        self.consumer_processor_details_screen_thread.start()
+>>>>>>> the_last_dance
 
     def run(self):
         self.__window.show()
@@ -135,11 +201,8 @@ class View(QMainWindow):
 
     ''' Click Event Function for Header Buttons. '''
 
-    def addEventClickGeneralButton(self, func):
-        self.__header.eventClickGeneralButton(func)
-
-
     def headerGeneralButtonClickEvent(self):
+<<<<<<< HEAD
         print("Botão Geral Apertado")
         self.__app.processEvents()
         if self.__header_buttons_click_event != HEADER_GENERAL_BUTTON_CLICK_EVENT:
@@ -156,20 +219,48 @@ class View(QMainWindow):
         self.__screen.update(self.__controller.dataRequestFromTheGeneralScreen2())
 
 
+=======
+        print("General")
+        self.__screen_layout.setCurrentIndex(0)
+        if not self.__timer_General.isActive():
+            self.__timer_General.start()
+        if self.__timer_Processor.isActive():
+            self.__timer_Processor.stop()
+        # Here the context change will happen
+>>>>>>> the_last_dance
     
     def headerProcessorButtonClickEvent(self):
-        self.__header_buttons_click_event = HEADER_PROCESSOR_BUTTON_CLICK_EVENT
         print("Processor")
+        if self.__timer_General.isActive():
+            self.__timer_General.stop()
+            print("Timer Atualização da Tela Geral parado!")
+        if not self.__timer_Processor.isActive():
+            self.__timer_Processor.start()
+        self.__screen_layout.setCurrentIndex(1)
+        # Here the context change will happen
     def headerMemoryButtonClickEvent(self):
-        self.__header_buttons_click_event = HEADER_MEMORY_BUTTON_CLICK_EVENT
+        if self.__timer_General.isActive():
+            self.__timer_General.stop()
+            print("Timer Atualização da Tela Geral parado!")
         print("Memory")
+<<<<<<< HEAD
     def updateDataFromModel(self):
         self.__controller.updateDataFromModel()
 
     def consume_data(self, data):
         self.__screen.update(data)
 # end of the class View
+=======
+        #self.__screen_layout.setCurrentIndex(1)
+        # Here the context change will happen
+>>>>>>> the_last_dance
 
-if __name__=='__main__':
-    view: View = View()
-    view.run()
+    def headerProcessButtonClickEvent(self):
+        if self.__timer_General.isActive():
+            self.__timer_General.stop()
+            print("Timer Atualização da Tela Geral parado!")
+        print("Process")
+        #self.__screen_layout.setCurrentIndex(1)
+        # Here the context change will happen
+
+# end of the class View

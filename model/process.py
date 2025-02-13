@@ -31,20 +31,22 @@ class Process:
         self.__PID = PID
         self.__command = command
         if (state=='R'):
-            self.__state = "Execução"
+            self.__state = "Running"
         elif(state == 'S' or state == 'D'):
-            self.__state = "Aguardando"
+            self.__state = "Sleeping"
         elif(state == 'Z'):
             self.__state = "Zumbi"
         elif(state == 'T'):
-            self.__state = "Paralisado"
+            self.__state = "Stopped"
         elif(state == 'I'):
-            self.__state = "Inativo"
+            self.__state = "Idle"
         else:
-            self.__state = "Desconhecido"
+            self.__state = "Unknow"
         self.__PPID = PPID
         self.__RSS = RSS
-        self.__memory = convertToLargestUnit('KB', RSS)
+        self.__memory = "0.00B"
+        if RSS != 0:
+            self.__memory = convertToLargestUnit('KB', RSS)
         self.__children: list = []
         self.__wchan = ""
         self.__cmdline = ""
@@ -67,7 +69,7 @@ class Process:
         return self.__memory
     def getInfo(self) -> list:
         cpu_usage: str = f""
-        return [self.__PID, self.__command, self.__state, self.__PPID, self.__memory, f"{self.__cpu_usage:.1f}"]
+        return [self.__PID, self.__command, self.__state, self.__PPID, self.__memory, f"{100*self.__cpu_usage:.1f}%"]
     def addProcessChildren(self, process) -> None:
         self.__children.append(process)
     def setWaitChannel(self, wchan: str) -> None:

@@ -1,4 +1,5 @@
 import sys
+<<<<<<< HEAD:main.py
 import time
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QPushButton, QLabel
 from PyQt6.QtGui import QColor, QPalette
@@ -8,11 +9,15 @@ import queue
 from PyQt6 import QtCore
 from PyQt6 import QtGui
 from view import Communicate
+=======
+from PyQt6.QtWidgets import QApplication
+>>>>>>> the_last_dance:__main__.py
 
 from view import View
 from model import Model
 from controller import Controller
 
+<<<<<<< HEAD:main.py
 click_event = False
 cond_variable = False
 lock = threading.Lock()
@@ -97,6 +102,8 @@ def view_thread():
 
 
 
+=======
+>>>>>>> the_last_dance:__main__.py
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
@@ -106,8 +113,8 @@ if __name__ == "__main__":
     controller = Controller()
 
     # Fazendo configurações iniciais...
-    # P.S.: A ordem importa das conexões.
     controller.connect(model=model)
+<<<<<<< HEAD:main.py
     view.connect(controller=controller)
 
     def eventclickGeneralButton():
@@ -115,11 +122,25 @@ if __name__ == "__main__":
         global click_event
         click_event = True
     view.addEventClickGeneralButton(eventclickGeneralButton)
+=======
+>>>>>>> the_last_dance:__main__.py
 
     '''
-        Executando a Thread de atualização dos dados do Model em cada 5s
+        Executando as Thread de atualização dos dados, de envio dos dados(Produtor) e de recebimento dos dados(Consumer)
     '''
 
+<<<<<<< HEAD:main.py
+=======
+    # Thread de Atualização de dados
+    controller.updateDataFromModel()
+
+    # Inicializando as Threads de Produção dos dados
+    controller.dataRequestFromTheGeneralScreen()
+    controller.dataRequestFromTheProcessorDetailsScreen()
+
+    # Inicializando as Threads de Consumação dos dados
+    view.consumer()
+>>>>>>> the_last_dance:__main__.py
 
     #    controller.updateDataFromModel() 
 
@@ -136,7 +157,7 @@ if __name__ == "__main__":
 
     '''
         Executando, de forma automatizada pela biblioteca PyQt6, a aplicação.
-        P.S.: O loop de execução do programa esta sendo executado nos bastidores pelo encapsulamento e automatização do PyQt6
+        P.S.: O loop de execução do programa esta sendo executado nos bastidores pelo encapsulamento e automatização do PyQt6.
     '''
 
     view.run()

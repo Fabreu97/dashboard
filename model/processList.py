@@ -16,25 +16,29 @@ class ProcessList:
         self.__I: int = 0 # Idle
         self.__U: int = 0 # Unknown
         self.__total_threads: int = 0
+
     def length(self) -> int:
         return len(self.processes)
+    
     def empty(self) -> bool:
         return self.processes == []
+    
     def getInfo(self) -> list:
         data: list = []
         process: Process
         for process in self.processes:
             data.append(process.getInfo())
         return data
+    
     def addProcess(self, process: Process) -> None:
         character = process.getState()[0]
-        if character == "E":
+        if character == "R":
             self.__R += 1
-        elif character == "A":
+        elif character == "S":
             self.__S += 1
         elif character == "Z":
             self.__Z += 1
-        elif character == "P":
+        elif character == "S":
             self.__T += 1
         elif character == "I":
             self.__I += 1
@@ -45,18 +49,25 @@ class ProcessList:
             parent.addProcessChildren(process)
         self.processes.append(process)
         self.__total_threads += process.getThreads()
+
     def getRunningProcessCount(self) -> int:
         return self.__R
+    
     def getSleepingProcessCount(self) -> int:
         return self.__S
+    
     def getZumbiProcessCount(self) -> int:
         return self.__Z
+    
     def getStoppedProcessCount(self) -> int:
         return self.__T
+    
     def getIdleProcessCount(self) -> int:
         return self.__I
+    
     def getUnknownProcessCount(self) -> int:
         return self.__U
+    
     def findProcess(self, target: int) -> Process | None:
         begin: int = 0
         end: int = len(self.processes) - 1
@@ -75,6 +86,7 @@ class ProcessList:
         if(flag):
             return self.processes[position]
         return None
+    
     def findProcessIndex(self, target: int) -> int:
         begin: int = 0
         end: int = len(self.processes) - 1
@@ -93,10 +105,12 @@ class ProcessList:
         if(flag):
             return position
         return -1
+    
     def eraseProcess(self, pid: int) -> None:
         position: int = self.findProcessIndex(pid)
         if(position != -1):
             del self.processes[position]
+
     def cleanProcessList(self) -> None:
         self.processes.clear()
         self.__R = 0
@@ -106,6 +120,8 @@ class ProcessList:
         self.__T = 0
         self.__I = 0
         self.__U = 0
+    
     def getTotalThreads(self) -> int:
         return self.__total_threads
+
 # end of the class ProcessList
