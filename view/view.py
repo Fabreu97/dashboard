@@ -13,6 +13,7 @@ from PyQt6.QtGui import QColor, QPalette
 from view.header import Header
 from view.general import GeneralScreen
 from view.processor_details_screen import ProcessorDetailsScreen
+from view.directory import Directory
 ###################################################################################################
 # MACROS
 ###################################################################################################
@@ -62,16 +63,19 @@ class View():
         self.__header = Header(self.__widget)
         self.__header.eventClickGeneralButton(self.headerGeneralButtonClickEvent)
         self.__header.eventClickProcessorButton(self.headerProcessorButtonClickEvent)
-        self.__header.eventClickMemoryButton(self.headerMemoryButtonClickEvent)
+        self.__header.eventClickMemoryButton(self.headerDirectoryButtonClickEvent)
         self.__header.eventClickProcessButton(self.headerProcessButtonClickEvent)
         self.__main_layout.addWidget(self.__header)
+        self.__main_layout.addWidget(self.__screen_widget)
 
         self.__general_screen = GeneralScreen(self.__widget)
         self.__screen_layout.addWidget(self.__general_screen)
-        self.__main_layout.addWidget(self.__screen_widget)
 
         self.__processor_details_screen = ProcessorDetailsScreen(self.__widget)
         self.__screen_layout.addWidget(self.__processor_details_screen)
+
+        self.__directory = Directory(self.__widget)
+        self.__screen_layout.addWidget(self.__directory)
         
         self.__window.setCentralWidget(self.__widget)
 
@@ -91,6 +95,8 @@ class View():
 
         self.consumer_general_thread = threading.Thread(target=self.consumerData, name="Consumer General Screen", daemon=True)
         self.consumer_processor_details_screen_thread = threading.Thread(target=self.consumerDataFromProcessorDetails, name="Consumer Processor Details Screen", daemon=True)
+        #self.getFileSystemInformation = threading.Thread(target=self.__directory.updateInformation, name="Get File System Information", daemon=True)
+        #self.getFileSystemInformation.start()
         self.lock = threading.Lock()
 
     def connect(self, controller: Controller):
@@ -140,11 +146,15 @@ class View():
             self.__timer_Processor.start()
         self.__screen_layout.setCurrentIndex(1)
         # Here the context change will happen
-    def headerMemoryButtonClickEvent(self):
+    def headerDirectoryButtonClickEvent(self):
         if self.__timer_General.isActive():
             self.__timer_General.stop()
             print("Timer Atualização da Tela Geral parado!")
-        print("Memory")
+        if self.__timer_Processor.isActive():
+            self.__timer_Processor.stop()
+            print("Timer Atualização da Tela do Processador parado!")
+        self.__screen_layout.setCurrentIndex(2)
+        print("Directory")
         #self.__screen_layout.setCurrentIndex(1)
         # Here the context change will happen
 
