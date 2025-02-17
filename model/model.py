@@ -57,6 +57,7 @@ DIRTY_PAGES: int = 6
 ## MACROS SISTEMAS
 PAGE_SIZE_KB: int = 4
 READ: str = "r"
+MEMORY_TAG = ["Size", "Resident", "Shared", "Text", "Lib", "Data", "Dirty Page"]
 ###################################################################################################
 # VARIABLE GLOBAL
 ###################################################################################################
@@ -201,6 +202,81 @@ class Model:
         return self.__currentProcesses.getInfo()
     def getHistoryCpuUsage(self, pid: int) -> list:
         return self.__history.getInfoCpuUsage(pid)
+    def dataProcessScreen(self, pid) -> list:
+        data = []
+        path = f"/proc/{pid}"
+        try:
+            if os.path.exists(path):
+                # Obtendo arquivos abertos pelo processo
+                try:
+                    open_files = len(os.listdir(f"/proc/{pid}/fd"))
+                except Exception:
+                    open_files = 0
+                try:
+                    with open(f"/proc/{pid}/io", "r") as f:
+                        io_stats = {}
+                        for line in f:
+                            key, value = line.split(":")
+                            io_stats[key.strip()] = int(value.strip())
+                except Exception:
+                    io_stats = {}
+                # Obtendo quantidade de sockets abertos pelo processo
+                try:
+                    with open(f'/proc/{pid}/net/tcp', 'r') as f:
+                        sockets_tcp = 0
+                        for line in f.readlines()[1:]:
+                            sockets_tcp = sockets_tcp+1
+                except Exception:
+                    sockets_tcp = 0
+                try:
+                    with open(f'/proc/{pid}/net/udp', 'r') as f:
+                        sockets_udp = 0
+                        for line in f.readlines()[1:]:
+                            sockets_udp = sockets_udp+1
+                except Exception:
+                    sockets_udp = 0
+
+                try:
+                    ipc_dir = f'/proc/{pid}/task'
+                    if(os.path.exists(ipc_dir)):
+                        for task in os.listdir(ipc_dir):
+                            try:
+                                with open(f'{ipc_dir}/{task}/status', 'r') as f:
+                                    sem_and_mut = 0
+                                    for line in f:
+                                        if line.startswith("SigPnd:") or line.startswith("ShdPnd:"):
+                                            sem_and_mut = sem_and_mut+1
+                            except FileNotFoundError:
+                                continue
+                except FileNotFoundError:
+                    print(f"Não foi possível acessar /proc/{pid}/task.")
+                    sem_and_mut = 0
+                except Exception:
+                    sem_and_mut = 0
+
+                try:
+                    with open(f"/proc/{pid}/statm", "r") as f:
+                        memory_proc_info = {}
+                        for line in f:
+                            value = line.split()
+                        for i in range(len(MEMORY_TAG)):
+                            memory_proc_info[MEMORY_TAG[i]] = int(value[i])
+                except Exception:
+                    memory_proc_info = {}
+
+                data.append(open_files)
+                data.append(io_stats)
+                data.append(sockets_tcp)
+                data.append(sockets_udp)
+                data.append(sem_and_mut)
+                data.append(memory_proc_info)
+                return data
+            else:
+                return None
+        except Exception:
+            print("Erro")
+            return([])
+
     def getHistoryRSS(self, pid: int) -> list:
         return self.__history.getInfoMemoryUsage()
     def dataRequestFromTheGeneralScreen(self) -> None:
@@ -240,5 +316,6 @@ class Model:
             buffer_processor_details_screen_data.put(data)
             print("Model está enviando os dados da Tela de Detalhes do Processador...")
             self.dataReadToSendProcessorScreen.clear()
+    
 
 # end of the class Model

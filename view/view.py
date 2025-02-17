@@ -14,6 +14,7 @@ from view.header import Header
 from view.general import GeneralScreen
 from view.processor_details_screen import ProcessorDetailsScreen
 from view.directory import Directory
+from view.processScreen import ProcessScreen
 ###################################################################################################
 # MACROS
 ###################################################################################################
@@ -76,6 +77,9 @@ class View():
 
         self.__directory = Directory(self.__widget)
         self.__screen_layout.addWidget(self.__directory)
+
+        self.__process_screen = ProcessScreen(self.__widget)
+        self.__screen_layout.addWidget(self.__process_screen)
         
         self.__window.setCentralWidget(self.__widget)
 
@@ -101,6 +105,7 @@ class View():
 
     def connect(self, controller: Controller):
         self.__controller = controller
+        self.__process_screen.connectController(controller)
 
     def consumerData(self):
         while(True):
@@ -162,7 +167,10 @@ class View():
         if self.__timer_General.isActive():
             self.__timer_General.stop()
             print("Timer Atualização da Tela Geral parado!")
-        print("Process")
+        if self.__timer_Processor.isActive():
+            self.__timer_Processor.stop()
+            print("Timer Atualização da Tela do Processador parado!")
+        self.__screen_layout.setCurrentIndex(3)
         #self.__screen_layout.setCurrentIndex(1)
         # Here the context change will happen
 

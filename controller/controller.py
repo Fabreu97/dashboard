@@ -71,5 +71,9 @@ class Controller:
         else:
             print("Erro ao inicializar a thread dataRequest por model não está conectado com Controller.")
 
+    def dataProcessScreen(self, pid):
+        if self.__model is not None:
+            return self.__model.dataProcessScreen(pid)
+
     
 # end of the Controller class

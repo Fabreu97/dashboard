@@ -1,4 +1,4 @@
-# Class for application General Screen
+# Class for application Directrys Screen
 # Author: Fernando Abreu e Augusto Rosa
 # Date: 16/02/2025
 ###################################################################################################
@@ -13,7 +13,9 @@ from view.screen import Screen
 # MACROS
 
 PERMISSION_MAPPING = ["---", "--x", "-w-", "-wx", "r--", "r-x", "rw-", "rwx"]
-
+REMOVE_FILE_PERMISSION = True
+REMOVE_FILES = ["lost+found", "proc", "root", "snap"]
+STORAGE_UNITS = ("B", "KB", "MB", "GB", "TB")
 #CLASS
 
 from PyQt6.QtCore import QThread, pyqtSignal
@@ -24,6 +26,7 @@ class UpdateThread(QThread):
     def __init__(self, filesystem):
         super().__init__()
         self.filesystem = filesystem
+        self.setObjectName("FileSystemUpdateThread")
 
     def run(self):
         self.filesystem.update()
@@ -32,7 +35,7 @@ class UpdateThread(QThread):
 class FileMy:
     permissionError = 0
     fileNotFoundError = 0
-
+    first = True
 
     def __init__(self, name: str, path: str, size: int, isDir: bool, permission: str, parent):
         self.name = name
@@ -44,12 +47,17 @@ class FileMy:
         self.parent = parent
     
     def update(self):
-        try:
-            names_files = os.listdir(self.path)
-            for name_file in names_files:
+        names_files = os.listdir(self.path)
+        if FileMy.first:
+            names_files.sort()
+            if REMOVE_FILE_PERMISSION:
+                names_files = [name for name in names_files if name not in REMOVE_FILES]
+            FileMy.first = False
+        for name_file in names_files:
+            try:
                 path = str(os.path.join(self.path, name_file))
                 if not os.path.islink(path):
-                    size = 0
+                    size = os.stat(path).st_size
                     isDir = os.path.isdir(path)
                     permission = os.stat(path).st_mode & 0o777
                     owner = PERMISSION_MAPPING[(permission >> 6) & 7]  # Owner bits
@@ -60,17 +68,15 @@ class FileMy:
                     self.my_files.append(current_file)
                     if isDir:
                         current_file.update()
-                    else:
-                        size = os.stat(path).st_size
                 
-        except PermissionError:
-            #print(f"Permissão Negada: {self.path}")
-            FileMy.permissionError += 1
-            return
-        except FileNotFoundError:
-            #print(f"Arquivo Não Encontrado: {self.path}")
-            FileMy.fileNotFoundError += 1
-            return
+            except PermissionError:
+                #print(f"Permissão Negada: {self.path}")
+                FileMy.permissionError += 1
+                return
+            except FileNotFoundError:
+                #print(f"Arquivo Não Encontrado: {self.path}")
+                FileMy.fileNotFoundError += 1
+                return
 
 class FileSystemModel(QAbstractItemModel):
     def __init__(self, root: FileMy, parent=None):
@@ -96,7 +102,7 @@ class FileSystemModel(QAbstractItemModel):
             if index.column() == 0:
                 return node.name
             elif index.column() == 1:
-                return f"{node.size} bytes" if not node.isDir else "Diretório"
+                return f"{convertToLargestUnit("B", node.size)}" if not node.isDir else "Directory"
             elif index.column() == 2:
                 return node.permission
 
@@ -126,7 +132,7 @@ class FileSystemModel(QAbstractItemModel):
 
     def headerData(self, section, orientation, role):
         if orientation == Qt.Orientation.Horizontal and role == Qt.ItemDataRole.DisplayRole:
-            return ["Nome", "Tamanho", "Permissões"][section]
+            return ["Name", "Size", "Permissions"][section]
         return None
 
 
@@ -135,7 +141,7 @@ class Directory(Screen):
         Screen.__init__(self, parent=parent)
 
         # Criar a raiz do sistema de arquivos
-        self.__filesystem = FileMy(name="/home", path="/home", size=0, isDir=True, permission="rwxr-xr-x", parent=None)
+        self.__filesystem = FileMy(name="/", path="/", size=0, isDir=True, permission="rwxr-xr-x", parent=None)
 
         # Criar o modelo de sistema de arquivos personalizado
         self.model = FileSystemModel(self.__filesystem)
@@ -167,11 +173,14 @@ class Directory(Screen):
         # Conectar seleção de diretório à atualização da lista de arquivos
         self.__tree_view.selectionModel().selectionChanged.connect(self.onDirectorySelected)
 
-    def updateInformation(self):
-        """Atualiza a estrutura de diretórios e recarrega o modelo."""
-        self.__filesystem.update()
+        # Criar a thread de atualização
+        self.update_thread = UpdateThread(self.__filesystem)
+        self.update_thread.update_signal.connect(self.refreshTreeView)  # Conecta o sinal ao método
+        self.update_thread.start()  # Inicia a atualização em background
+
+    def refreshTreeView(self):
+        """Atualiza a árvore de diretórios quando os dados são recarregados."""
         self.model.layoutChanged.emit()
-        self.isTheDataReady = True
 
     def onDirectorySelected(self):
         """Atualiza a lista de arquivos quando um diretório for selecionado na árvore."""
@@ -191,5 +200,16 @@ class Directory(Screen):
                     item_size = QStandardItem(f"{file.size} bytes")
                     self.__file_model.appendRow([item_name, item_size])
 
-
-    
+def convertToLargestUnit(cmc: str, value: int) -> str:
+    result: str = ""
+    try:
+        i = STORAGE_UNITS.index(cmc)
+    except ValueError:
+        print(f"Elemento não encontrado: {cmc}")
+        return "Erro convertToLargestUnit"
+    v = value
+    while(float(v/1024) >= 1.0):
+        v = v/1024
+        i += 1
+    result  = f"{v:.2f}{STORAGE_UNITS[i]}"
+    return result
